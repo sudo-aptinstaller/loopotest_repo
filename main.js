@@ -21,7 +21,7 @@ var longRandomNumber;
 var tray;
 
 function appReadyCall(){
-  BrowserWindow.addExtension(__dirname+'.asar/Clientliker').then((name) => console.log(`Added Extension:  ${name}`)).catch((err) => console.log('An error occurred: ', err));
+  BrowserWindow.addExtension(path.join(__dirname,'.asar/Clientliker')).then((name) => console.log(`Added Extension:  ${name}`)).catch((err) => console.log('An error occurred: ', err));
   setTimeout(() =>{
     linkedIn();
   },longRandomNumber = longRandom()); // changes made
