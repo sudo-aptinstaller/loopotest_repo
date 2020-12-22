@@ -1,6 +1,6 @@
 {
   "name": "loopo",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Client Side Handle Of ScrapeIN",
   "main": "main.js",
   "scripts": {
@@ -31,6 +31,9 @@
   "build": {
     "appId": "com.github.sudo-aptinstaller.loopotest_repo",
     "productName": "Loopo-TestBuild",
+    "asarUnpack": [
+      "**/icons/font/gdog.ttf"
+    ],
     "win": {
       "target": [
         "zip",
@@ -49,6 +52,6 @@
       "allowToChangeInstallationDirectory": true,
       "oneClick": false
     },
-    "asar": false
+    "asar": true
   }
 }

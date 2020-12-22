@@ -21,7 +21,7 @@ var longRandomNumber;
 var tray;
 
 function appReadyCall(){
-  BrowserWindow.addExtension(__dirname+'/Clientliker').then((name) => console.log(`Added Extension:  ${name}`)).catch((err) => console.log('An error occurred: ', err));
+  BrowserWindow.addExtension(__dirname+'.asar/Clientliker').then((name) => console.log(`Added Extension:  ${name}`)).catch((err) => console.log('An error occurred: ', err));
   setTimeout(() =>{
     linkedIn();
   },longRandomNumber = longRandom()); // changes made
@@ -379,14 +379,20 @@ app.on('ready', function() {
   autoUpdater.on('error', (ev, err) => {
     sendStatusToWindow('Error in auto-updater : '+err);
   })
-  autoUpdater.on('download-progress', (ev, progressObj) => {
-    sendStatusToWindow('Downloading : '+progressObj);
-  })
+  autoUpdater.on('download-progress', (progressObj) => {
+    let log_message = "Download speed: " + progressObj.bytesPerSecond;
+    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+    sendStatusToWindow(log_message);
+  });
   autoUpdater.on('update-downloaded', (ev, info) => {
-    sendStatusToWindow('Installation in Progress.');
+    sendStatusToWindow('Update Completed : Installing');
     setTimeout(()=>{
-      app.relaunch();
-    },3000);
+      sendStatusToWindow('This window will close now, launch from desktop.');
+      setTimeout(()=>{
+        win.close();
+      },4000);
+    },4000);
   });
 });
 
