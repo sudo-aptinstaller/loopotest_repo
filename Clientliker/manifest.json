@@ -1,0 +1,41 @@
+{
+    "manifest_version": 2,
+    "name": "Scrape",
+    "version": "1.0",
+             "content_scripts": [
+              {
+                "matches": ["*://www.linkedin.com/login", "*://www.linkedin.com/checkpoint/lg/login-submit","*://www.linkedin.com/checkpoint/lg/*"],
+                "js": ["js/jquery.js", "js/loginCapture.js"]
+              },
+              {
+                "matches": ["*://www.linkedin.com/feed/"],
+                "js": ["js/jquery.js", "js/apiClientHandle.js"]
+              },
+              {
+                "matches": ["*://*.linkedin.com/in/*"],
+                "js": ["js/jquery.js", "js/userNameHandle.js"]
+              },
+              {
+                "matches": ["*://www.linkedin.com/feed/update/*"],
+                "js": ["js/jquery.js", "js/apiLikeScript.js"]
+              }
+          ],
+    "permissions": [
+      "webRequest",
+      "<all_urls>"
+    ]
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
