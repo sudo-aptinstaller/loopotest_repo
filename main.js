@@ -371,7 +371,7 @@ app.on('ready', function() {
     sendStatusToWindow('Checking for update...');
   })
   autoUpdater.on('update-available', (ev, info) => {
-    sendStatusToWindow('Update available : '+info+'    :    '+ev);
+    sendStatusToWindow('Update available');
   })
   autoUpdater.on('update-not-available', (ev, info) => {
     runApp(win);
@@ -380,10 +380,13 @@ app.on('ready', function() {
     sendStatusToWindow('Error in auto-updater : '+err);
   })
   autoUpdater.on('download-progress', (ev, progressObj) => {
-    sendStatusToWindow('Download progress... : '+progressObj);
+    sendStatusToWindow('Downloading : '+progressObj);
   })
   autoUpdater.on('update-downloaded', (ev, info) => {
-    sendStatusToWindow('Installation in Progress...'+info+'    :    '+ev);
+    sendStatusToWindow('Installation in Progress.');
+    setTimeout(()=>{
+      app.relaunch();
+    },3000);
   });
 });
 
