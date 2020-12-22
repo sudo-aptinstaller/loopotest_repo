@@ -32,9 +32,8 @@
             }
         </script>
         
-        <h2 class="nerko"> Checking for updates...</h2>
+        <h2 class="nerko" id="messages"></h2>
         <h2 class="nerko" id="version"></h2>
-        <div class="nerko" id="messages"></div>
     </div>
     <script>
         // Display the current version
@@ -44,10 +43,8 @@
         // Listen for messages
         const {ipcRenderer} = require('electron');
         ipcRenderer.on('message', function(event, text) {
-          var container = document.getElementById('messages');
-          var message = document.createElement('div');
+          var message = document.getElementById('messages');
           message.innerHTML = text;
-          container.appendChild(message);
         })
     </script>
 </body>

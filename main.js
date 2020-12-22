@@ -4,6 +4,7 @@ const path = require('path');
 const CryptoJS = require('crypto-js');
 const {autoUpdater} = require("electron-updater");
 const log = require('electron-log');
+const { setTimeout } = require('globalthis/implementation');
 
 app.setLoginItemSettings({
   openAtLogin: true,
@@ -272,7 +273,14 @@ function decodeItem(cypher){
     });
   }
 
-  function runApp(){
+  function runApp(updateWindow){
+    setTimeout(()=>{
+      updateWindow.close();
+      updateWindow.on('closed', () => {
+        updateWindow = null;
+      });
+    },3000);
+
     app.whenReady().then(() => {
       fs.readFile(app.getPath('userData') + '/applicationData/user.joel','utf-8', (error, data) =>{
         if(error || data == '' || !data){
@@ -340,6 +348,7 @@ function sendStatusToWindow(text) {
   log.info(text);
   win.webContents.send('message', text);
 }
+
 function createDefaultWindow() {
   win = new BrowserWindow({frame:false,height:400,width:300,
     webPreferences:{
@@ -349,38 +358,33 @@ function createDefaultWindow() {
       allowRunningInsecureContent: true
     }
   });
-  win.on('closed', () => {
-    win = null;
-  });
   win.loadURL(`file://${__dirname}/version.html#v${app.getVersion()}`);
   return win;
 }
  
 
-autoUpdater.on('checking-for-update', () => {
-  sendStatusToWindow('Checking for update...');
-})
-autoUpdater.on('update-available', (ev, info) => {
-  sendStatusToWindow('Update available.');
-})
-autoUpdater.on('update-not-available', (ev, info) => {
-  win.close();
-  runApp();
-})
-autoUpdater.on('error', (ev, err) => {
-  sendStatusToWindow('Error in auto-updater.');
-})
-autoUpdater.on('download-progress', (ev, progressObj) => {
-  sendStatusToWindow('Download progress... : '+progressObj);
-})
-autoUpdater.on('update-downloaded', (ev, info) => {
-  setTimeout(()=>{
-    autoUpdater.quitAndInstall();  
-  },5000);
-});
-
 app.on('ready', function() {
   createDefaultWindow();
+  autoUpdater.checkForUpdatesAndNotify();
+
+  autoUpdater.on('checking-for-update', () => {
+    sendStatusToWindow('Checking for update...');
+  })
+  autoUpdater.on('update-available', (ev, info) => {
+    sendStatusToWindow('Update available : '+info+'    :    '+ev);
+  })
+  autoUpdater.on('update-not-available', (ev, info) => {
+    runApp(win);
+  });
+  autoUpdater.on('error', (ev, err) => {
+    sendStatusToWindow('Error in auto-updater : '+err);
+  })
+  autoUpdater.on('download-progress', (ev, progressObj) => {
+    sendStatusToWindow('Download progress... : '+progressObj);
+  })
+  autoUpdater.on('update-downloaded', (ev, info) => {
+    sendStatusToWindow('Installation in Progress...'+info+'    :    '+ev);
+  });
 });
 
 
