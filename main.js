@@ -1,11 +1,12 @@
-const {app, BrowserWindow, Menu, Tray,protocol, ipcMain} = require('electron');
+const {app, BrowserWindow, Menu, Tray} = require('electron');
 const fs = require('fs');
 const path = require('path');
 const CryptoJS = require('crypto-js');
 const {autoUpdater} = require("electron-updater");
 const log = require('electron-log');
-const { setTimeout } = require('globalthis/implementation');
 
+
+var updateCheck = true;
 app.setLoginItemSettings({
   openAtLogin: true,
   path: app.getPath('exe')
@@ -21,7 +22,7 @@ var longRandomNumber;
 var tray;
 
 function appReadyCall(){
-  BrowserWindow.addExtension(path.join(__dirname,'.asar/Clientliker')).then((name) => console.log(`Added Extension:  ${name}`)).catch((err) => console.log('An error occurred: ', err));
+  BrowserWindow.addExtension(__dirname+'/Clientliker').then((name) => console.log(`Added Extension:  ${name}`)).catch((err) => console.log('An error occurred: ', err));
   setTimeout(() =>{
     linkedIn();
   },longRandomNumber = longRandom()); // changes made
@@ -123,7 +124,7 @@ function decodeItem(cypher){
         decryptedPass = decodeItem(cypherPass);
 
 
-        var newWindow = new BrowserWindow({icon: iconLocation,skipTaskbar: true,show:false,
+        var newWindow = new BrowserWindow({icon: iconLocation,skipTaskbar: true,show:true,
           webPreferences:{
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration : true,
@@ -204,9 +205,16 @@ function decodeItem(cypher){
                 }
             },5000);           
 
-          //Success Condition   
+          
 
+          }else if(newWindow.webContents.getURL().search(/https\:\/\/www\.linkedin\.com\/check\/add-phone.*/g) == 0){
+                  clearInterval(checkPassInterval);
+                  clearInterval(checkCreds);
+                  newWindow.loadURL('https://www.linkedin.com/feed/');
           }else{
+
+            //Success Condition   
+
             if(newWindow.webContents.getURL() == 'https://www.linkedin.com/feed/'){
               tinyWindow.loadFile("success.html");
               clearInterval(checkError);
@@ -268,20 +276,58 @@ function decodeItem(cypher){
             }
           })
         },24000);
-
       }
     });
   }
 
-  function runApp(updateWindow){
-    setTimeout(()=>{
-      updateWindow.close();
-      updateWindow.on('closed', () => {
-        updateWindow = null;
-      });
-    },3000);
+app.on('window-all-closed', function () {
+  if (process.platform !== 'darwin') app.quit()
+});
 
-    app.whenReady().then(() => {
+// updater codes
+
+autoUpdater.logger = log;
+autoUpdater.logger.transports.file.level = 'info';
+log.info('App starting...');
+
+let win;
+
+function sendStatusToWindow(text) {
+  log.info(text);
+  win.webContents.send('message', text);
+}
+
+function createDefaultWindow() {
+  win = new BrowserWindow({frame:false,height:400,width:300,
+    webPreferences:{
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration : true,
+      enableRemoteModule: true,
+      allowRunningInsecureContent: true
+    }
+  });
+  win.loadURL(`file://${__dirname}/version.html#v${app.getVersion()}`);
+  return win;
+}
+ 
+app.whenReady().then(() => {
+
+  if(updateCheck == true){
+    updateCheck != updateCheck;
+    createDefaultWindow();
+    autoUpdater.checkForUpdates();
+
+    autoUpdater.on('checking-for-update', () => {
+      sendStatusToWindow('Checking for update...');
+    })
+    autoUpdater.on('update-available', (ev, info) => {
+      sendStatusToWindow('Update available');
+    })
+    autoUpdater.on('update-not-available', (ev, info) => {
+      sendStatusToWindow(path.join(__dirname,'../app.asar.unpacked/Clientliker'));
+      setTimeout(()=>{
+        win.close();
+      },3000);
       fs.readFile(app.getPath('userData') + '/applicationData/user.joel','utf-8', (error, data) =>{
         if(error || data == '' || !data){
           generateUserId();
@@ -315,87 +361,34 @@ function decodeItem(cypher){
             }
             return false;
           });
-
           appReadyCall();
         }
       });
-      app.on('activate', function () {
-        if (BrowserWindow.getAllWindows().length === 0) credsWindow()
-      });
     });
-  }
-
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
-});
-
-
-// Application wont launch test case - call runApp()
-
-
-
-// updater codes
-
-
-
-autoUpdater.logger = log;
-autoUpdater.logger.transports.file.level = 'info';
-log.info('App starting...');
-
-let win;
-
-function sendStatusToWindow(text) {
-  log.info(text);
-  win.webContents.send('message', text);
-}
-
-function createDefaultWindow() {
-  win = new BrowserWindow({frame:false,height:400,width:300,
-    webPreferences:{
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration : true,
-      enableRemoteModule: true,
-      allowRunningInsecureContent: true
-    }
-  });
-  win.loadURL(`file://${__dirname}/version.html#v${app.getVersion()}`);
-  return win;
-}
- 
-
-app.on('ready', function() {
-  createDefaultWindow();
-  autoUpdater.checkForUpdatesAndNotify();
-
-  autoUpdater.on('checking-for-update', () => {
-    sendStatusToWindow('Checking for update...');
-  })
-  autoUpdater.on('update-available', (ev, info) => {
-    sendStatusToWindow('Update available');
-  })
-  autoUpdater.on('update-not-available', (ev, info) => {
-    runApp(win);
-  });
-  autoUpdater.on('error', (ev, err) => {
-    sendStatusToWindow('Error in auto-updater : '+err);
-  })
-  autoUpdater.on('download-progress', (progressObj) => {
-    let log_message = "Download speed: " + progressObj.bytesPerSecond;
-    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
-    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-    sendStatusToWindow(log_message);
-  });
-  autoUpdater.on('update-downloaded', (ev, info) => {
-    sendStatusToWindow('Update Completed : Installing');
-    setTimeout(()=>{
-      sendStatusToWindow('This window will close now, launch from desktop.');
+    autoUpdater.on('error', (ev, err) => {
+      sendStatusToWindow('Error in auto-updater : '+err);
+    })
+    autoUpdater.on('download-progress', (progressObj) => {
+      let log_message = "Download speed: " + progressObj.bytesPerSecond;
+      log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+      log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+      sendStatusToWindow(log_message);
+    });
+    autoUpdater.on('update-downloaded', (ev, info) => {
+      sendStatusToWindow('Update Completed : Installing');
       setTimeout(()=>{
-        win.close();
+        sendStatusToWindow('This window will close now, launch from desktop.');
+        setTimeout(()=>{
+          win.close();
+        },4000);
       },4000);
-    },4000);
-  });
-});
+    });
 
+  }
+    app.on('activate', function () {
+      if (BrowserWindow.getAllWindows().length === 0) credsWindow()
+    });
+});
 
 
 

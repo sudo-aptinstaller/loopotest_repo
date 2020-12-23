@@ -30,10 +30,7 @@
   },
   "build": {
     "appId": "com.github.sudo-aptinstaller.loopotest_repo",
-    "productName": "Loopo-TestBuild",
-    "asarUnpack": [
-      "**/icons/font/gdog.ttf"
-    ],
+    "productName": "Loopo",
     "win": {
       "target": [
         "zip",
@@ -52,6 +49,6 @@
       "allowToChangeInstallationDirectory": true,
       "oneClick": false
     },
-    "asar": true
+    "asar": false
   }
 }
