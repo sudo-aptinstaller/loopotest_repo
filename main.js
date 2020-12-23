@@ -124,7 +124,7 @@ function decodeItem(cypher){
         decryptedPass = decodeItem(cypherPass);
 
 
-        var newWindow = new BrowserWindow({icon: iconLocation,skipTaskbar: true,show:true,
+        var newWindow = new BrowserWindow({icon: iconLocation,skipTaskbar: true,show:false,
           webPreferences:{
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration : true,
