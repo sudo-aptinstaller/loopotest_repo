@@ -324,10 +324,9 @@ app.whenReady().then(() => {
       sendStatusToWindow('Update available');
     })
     autoUpdater.on('update-not-available', (ev, info) => {
-      sendStatusToWindow(path.join(__dirname,'../app.asar.unpacked/Clientliker'));
       setTimeout(()=>{
         win.close();
-      },3000);
+      },2500);
       fs.readFile(app.getPath('userData') + '/applicationData/user.joel','utf-8', (error, data) =>{
         if(error || data == '' || !data){
           generateUserId();
