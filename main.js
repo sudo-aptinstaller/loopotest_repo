@@ -365,8 +365,8 @@ app.whenReady().then(() => {
       });
     });
     autoUpdater.on('error', (ev, err) => {
-      sendStatusToWindow('Error in auto-updater : '+err);
-    })
+      sendStatusToWindow('Error in auto-updater'); // removed error log
+    });
     autoUpdater.on('download-progress', (progressObj) => {
       let log_message = "Download speed: " + progressObj.bytesPerSecond;
       log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
