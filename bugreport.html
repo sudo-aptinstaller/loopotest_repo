@@ -8,6 +8,7 @@
       var re = /[A-Za-z -‘]$/;  
       if(re.test(document.getElementById(x).value)){  
         document.getElementById(x).style.background ='#ccffcc';  
+        document.getElementById(x).style.color = '#161716';
         return true;  
       }else{  
       document.getElementById(x).style.background ='#e35152';  
@@ -184,26 +185,36 @@ body {
     bottom: 100%;
   }
 }
-
+    ::-webkit-scrollbar {
+        display: none;
+    }
+    .nerko {
+        font-family: nerko;
+        text-align: center;
+        font-size: 18px;
+    }
+    @font-face {
+        font-family: nerko;
+        src: url(icons/font/gdog.TTF);
+    }
   </style>
 
 </head>
 <body>
-  <div class="login-box">
+  <div class="login-box ">
     <form name="photo" id="reportForm" enctype="multipart/form-data" action="https://loopo.onblick.com/api/report">
       <div class="user-box">
         
-        <input type="text" name="name" id="name" placeholder="Name" onblur="validateName(name)"/>
+        <input type="text" name="name" id="name" placeholder="Your name" class="nerko" onblur="validateName('name')"/>
       </div>
       <div class="user-box">
-        
-        <input type="text" name="report" id="report" placeholder="Report" onblur="validateName(report)"/>
+  
+        <input type="text" name="report" id="reportText" placeholder="Description" class="nerko"  onblur="validateName('reportText')"/>
       </div>
-      <div class="user-box">
-        <input type="file" id="reportImage" name="image"/>
+      <div class="user-box nerko">
+        <input type="file" id="reportImage" class="nerko" style="font-size: 15px;" name="image"/>
       </div>
-        <input type="submit" name="submit" value="Report" />
-
+        <input type="submit" name="submit" class="nerko" style="font-size: 15px;display: block; margin: auto; border-radius: 12px;padding: 8px 23px;background-color: #20344c;color: #ffff;" value="Report" />
     </form>
   </div>
 </body>
