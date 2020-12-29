@@ -3,6 +3,19 @@
 <head>
   <meta charset="utf-8">
   <script src="Clientliker/js/bugreport.js"></script>
+  <script>
+    function validateName(x){  
+      var re = /[A-Za-z -‘]$/;  
+      if(re.test(document.getElementById(x).value)){  
+        document.getElementById(x).style.background ='#ccffcc';  
+        return true;  
+      }else{  
+      document.getElementById(x).style.background ='#e35152';  
+      return false;  
+      }  
+
+    }    
+  </script>
   <style>
     html {
   height: 100%;
@@ -180,11 +193,11 @@ body {
     <form name="photo" id="reportForm" enctype="multipart/form-data" action="https://loopo.onblick.com/api/report">
       <div class="user-box">
         
-        <input type="text" name="name" id="name" placeholder="Name"/>
+        <input type="text" name="name" id="name" placeholder="Name" onblur="validateName(name)"/>
       </div>
       <div class="user-box">
         
-        <input type="text" name="report" id="report" placeholder="Report"/>
+        <input type="text" name="report" id="report" placeholder="Report" onblur="validateName(report)"/>
       </div>
       <div class="user-box">
         <input type="file" id="reportImage" name="image"/>
