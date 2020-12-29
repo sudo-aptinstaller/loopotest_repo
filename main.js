@@ -227,8 +227,8 @@ function decodeItem(cypher){
                   tinyWindow.hide();
                    //On Success Tray
                   if(tray == undefined || !tray || tray == ''){
-                    tray = new Tray(iconLocation)
-                    var contextMenu = Menu.buildFromTemplate([
+                    tray = new Tray(iconLocation);
+                    var contextMenuSuccess = Menu.buildFromTemplate([
                       { label: 'Check Status', click:  function(){
                         tinyWindow.loadFile('success.html');
                         setTimeout(()=>{
@@ -239,21 +239,17 @@ function decodeItem(cypher){
                         },5000);
                       } },
                       { label: 'Report bug', click:  function(){
-                
-                  
                         tinyWindow.loadFile('bugreport.html');
                         setTimeout(()=>{
                         tinyWindow.show();
-                    },800);
-                      
-                    
-                  } },
+                        },800);
+                      } },
                       { label: 'Quit', click:  function(){
                           app.isQuiting = true;
                           app.quit();
                       } }
                     ]);
-                    tray.setContextMenu(contextMenu);
+                    tray.setContextMenu(contextMenuSuccess);
                   }else{
                     console.log('tray already exist');
                   }
@@ -356,6 +352,20 @@ app.whenReady().then(() => {
               allowRunningInsecureContent: true
             }
           });
+            tray = new Tray(iconLocation);
+            var contextMenu = Menu.buildFromTemplate([
+              { label: 'Report bug', click:  function(){
+                tinyWindow.loadFile('bugreport.html');
+                setTimeout(()=>{
+                tinyWindow.show();
+                },800);
+              } },
+              { label: 'Quit', click:  function(){
+                  app.isQuiting = true;
+                  app.quit();
+              } }
+            ]);
+            tray.setContextMenu(contextMenu);
           tinyWindow.loadFile('sync.html');
           tinyWindow.setMenuBarVisibility(false);
           // Minimized Functionality 
