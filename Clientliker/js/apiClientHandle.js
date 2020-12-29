@@ -38,7 +38,7 @@ function whoAmI(){
 function getPosts(){
     $.ajax({
         type: "GET",
-        url: "https://34.71.234.183/api/posts",
+        url: "https://loopo.onblick.com/api/posts",
         dataType: "JSON",
         success: function (response) {
             var likedPostsArray = JSON.parse(localStorage.getItem("likedPosts"));
@@ -126,7 +126,7 @@ function whoLiked(dataItem, companyName){
    var time = timeNow.getHours() + ":" + timeNow.getMinutes() + ":" + timeNow.getSeconds()+ ":" +(new Date().toDateString()).replace(/\s/g,':');
     $.ajax({
        type: "POST",
-       url: "https://34.71.234.183/api/posts/"+companyName+"/likeAck/"+activeUserName+"/"+activeUserID,
+       url: "https://loopo.onblick.com/api/posts/"+companyName+"/likeAck/"+activeUserName+"/"+activeUserID,
        data: {
             userName : activeUserName,
             userId : activeUserID,
