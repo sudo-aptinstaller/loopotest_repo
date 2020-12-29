@@ -238,6 +238,16 @@ function decodeItem(cypher){
                           tinyWindow.hide();
                         },5000);
                       } },
+                      { label: 'Report bug', click:  function(){
+                
+                  
+                        tinyWindow.loadFile('bugreport.html');
+                        setTimeout(()=>{
+                        tinyWindow.show();
+                    },800);
+                      
+                    
+                  } },
                       { label: 'Quit', click:  function(){
                           app.isQuiting = true;
                           app.quit();
