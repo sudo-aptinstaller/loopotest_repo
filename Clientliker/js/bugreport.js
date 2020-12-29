@@ -1,7 +1,7 @@
 const $ = require('jquery');
 const fs = require('fs');
 const path = require('path');
-const {remote} = require('electron');
+const {remote, app} = require('electron');
 const { ajax } = require('jquery');
 var appId;  
 
@@ -25,9 +25,11 @@ $(document).ready(function (e) {
               contentType: false,
               processData: false,
               success:function(response){
-                  console.log(response);
-                  $('#reportForm').html('<h3 class="nerko">Thank you for the feedback. </h3>');
-                  $('#reportFomr').show();
+                  $('#reportForm').html('<h3 class="nerko" style="color:#fff" >Thank you for the feedback.</h3>');
+                  $('#reportForm').show();
+                  setTimeout(()=>{
+                    remote.app.quit();
+                  },5000);
               },
               error: function(data){
                   console.log('Error : ',data);
