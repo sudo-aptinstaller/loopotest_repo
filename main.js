@@ -21,11 +21,11 @@ var tinyWindow;
 var longRandomNumber;
 var tray;
 
-function appReadyCall(){
+function appReadyCall(randomVariable){
   BrowserWindow.addExtension(__dirname+'/Clientliker').then((name) => console.log(`Added Extension:  ${name}`)).catch((err) => console.log('An error occurred: ', err));
   setTimeout(() =>{
     linkedIn();
-  },longRandomNumber = longRandom()); // changes made
+  },randomVariable); // changes made
 }
 
 
@@ -225,10 +225,8 @@ function decodeItem(cypher){
                 newWindow.webContents.executeJavaScript('localStorage.removeItem("linkedinPassword")', true);
                 setTimeout(()=>{
                   tinyWindow.hide();
-                   //On Success Tray
-                  if(tray == undefined || !tray || tray == ''){
-                    tray = new Tray(iconLocation);
-                    var contextMenuSuccess = Menu.buildFromTemplate([
+                  if(tray){
+                    contextMenu = Menu.buildFromTemplate([
                       { label: 'Check Status', click:  function(){
                         tinyWindow.loadFile('success.html');
                         setTimeout(()=>{
@@ -249,9 +247,7 @@ function decodeItem(cypher){
                           app.quit();
                       } }
                     ]);
-                    tray.setContextMenu(contextMenuSuccess);
-                  }else{
-                    console.log('tray already exist');
+                  tray.setContextMenu(contextMenu);
                   }
                 },5000);
               }
@@ -333,13 +329,13 @@ app.whenReady().then(() => {
       setTimeout(()=>{
         win.close();
       },2500);
-      fs.readFile(app.getPath('userData') + '/applicationData/user.joel','utf-8', (error, data) =>{
-        if(error || data == '' || !data){
-          generateUserId();
-        }else{
-          userID = data;
-        }
-      });
+        fs.readFile(app.getPath('userData') + '/applicationData/user.joel','utf-8', (error, data) =>{
+          if(error || data == '' || !data){
+            generateUserId();
+          }else{
+            userID = data;
+          }
+        });
       fs.readFile(app.getPath('userData') + '/applicationData/me.joel','utf-8', (error, data) =>{
         if(error || data == '   ' || !data){
           userCreds();
@@ -352,22 +348,29 @@ app.whenReady().then(() => {
               allowRunningInsecureContent: true
             }
           });
-            tray = new Tray(iconLocation);
-            var contextMenu = Menu.buildFromTemplate([
-              { label: 'Report bug', click:  function(){
-                tinyWindow.loadFile('bugreport.html');
-                setTimeout(()=>{
-                tinyWindow.show();
-                },800);
-              } },
-              { label: 'Quit', click:  function(){
-                  app.isQuiting = true;
-                  app.quit();
-              } }
-            ]);
-            tray.setContextMenu(contextMenu);
+            if(tray == undefined || !tray || tray == ''){
+              tray = new Tray(iconLocation)
+              var contextMenu = Menu.buildFromTemplate([
+                { label: 'Report bug', click:  function(){
+                  tinyWindow.loadFile('bugreport.html');
+                  setTimeout(()=>{
+                  tinyWindow.show();
+                  },800);
+                } },
+                { label: 'Quit', click:  function(){
+                    app.isQuiting = true;
+                    app.quit();
+                } }
+              ]);
+              tray.setContextMenu(contextMenu);
+            }else{
+              console.log('tray already exist');
+            }
           tinyWindow.loadFile('sync.html');
           tinyWindow.setMenuBarVisibility(false);
+          longRandomNumber = longRandom();
+          tinyWindow.webContents.executeJavaScript('localStorage.setItem("thisIsTheRandomTime", '+longRandomNumber+')');
+          appReadyCall(longRandomNumber);
           // Minimized Functionality 
           tinyWindow.on('minimize',function(event){
             event.preventDefault();
@@ -380,7 +383,7 @@ app.whenReady().then(() => {
             }
             return false;
           });
-          appReadyCall();
+
         }
       });
     });

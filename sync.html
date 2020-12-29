@@ -21,6 +21,9 @@
          </li-icon>
         <script>
             getRandomImage();
+            setTimeout(()=>{
+                loading();
+            },300);
             function getRandomImage() {
                 random_images_array = ['img1.gif','img2.gif','img3.gif','img4.gif','img5.gif','img6.gif'];
                 path = 'icons/sync/';
@@ -31,11 +34,30 @@
                 document.close();
             }
         </script>
-        <h2 class="nerko"> Syncing<br>please wait</h2>
+        <h2 class="nerko"> Syncing</h2>
+        <div id="outlineBar">
+            <div id="loadingColor" class="nerko"></div>
+        </div>
     </div>
 
 </body>
 <style>
+    #outlineBar {
+        margin: 0 auto;
+        border-radius: 25px !important;
+        width: 50%;
+        background-color: #ddd;
+    }
+
+    #loadingColor {
+        border-radius: 25px !important;
+        width: 25%;
+        height: 30px;
+        background-color: #0a66c2;
+        text-align: center;
+        line-height: 30px;
+        color: white;
+    }
     ::-webkit-scrollbar {
         display: none;
     }
@@ -44,7 +66,7 @@
         margin-top: 14%;
     }
     
-    img { border:none; height: 125px;display: block;margin: 40px auto !important;}
+    img { border:none; height: 125px;display: block;margin: 0 auto !important;margin-top: 40px;}
     .nerko {
         font-family: nerko;
         text-align: center;
@@ -56,4 +78,24 @@
 
     }
 </style>
+<script>
+    function loading(){
+            var mainTotal = localStorage.getItem('thisIsTheRandomTime');
+            mainTotal = parseInt(mainTotal);
+            mainTotal = mainTotal + 15915;
+            var loadingColor = document.getElementById("loadingColor");
+            var width = 0.00;
+            var id = setInterval(frame,100);
+            function frame() {
+                if (width >= mainTotal/100 ) {
+                    clearInterval(id);
+                } else {
+                    percent = (width/(mainTotal/100))*100; 
+                    loadingColor.style.width = (percent + 1)+"%";
+                    loadingColor.innerHTML = Math.floor(percent + 1)  + "%";
+                    width++;
+                }
+            }
+    }
+</script>
 </html>
