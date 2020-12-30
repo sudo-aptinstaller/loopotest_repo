@@ -28,7 +28,9 @@ $(document).ready(function (e) {
                   $('#reportForm').html('<h3 class="nerko" style="color:#fff" >Thank you for the feedback.</h3>');
                   $('#reportForm').show();
                   setTimeout(()=>{
-                    remote.app.quit();
+                    currentWindow = remote.getCurrentWindow();
+                    currentWindow.close();
+                    currentWindow = null;
                   },5000);
               },
               error: function(data){
