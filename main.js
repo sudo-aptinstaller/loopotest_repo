@@ -250,34 +250,36 @@ function decodeItem(cypher){
                   tray.setContextMenu(contextMenu);
                   }
                 },5000);
+
+                var linkCollectionInterval =  setInterval(()=>{
+                  newWindow.webContents.executeJavaScript('localStorage.getItem("iHaveLinks")').then( data =>{
+                      if(data == 1){
+                          newWindow.webContents.executeJavaScript('localStorage.setItem("iHaveLinks", 0)');
+                          newWindow.webContents.executeJavaScript('localStorage.getItem("linkToAppend")').then(linkCollectionToAppend =>{
+                          appendToLinkCollection(linkCollectionToAppend, newWindow);
+                        });
+                      }
+                    });
+                },10000);
+                  
+                var idleTimeInterval = setInterval(()=>{
+                  newWindow.webContents.executeJavaScript('localStorage.getItem("am-I-Idle?")').then(data =>{
+                    if(data == 1){
+                      clearInterval(linkCollectionInterval);
+                      clearInterval(idleTimeInterval);
+                      newWindow.loadURL("https://www.linkedin.com/m/logout");
+                      newWindow.close();
+                      setTimeout(()=>{
+                        appReadyCall();
+                      },cycleRandomVariable = cycleRandom());
+                    }
+                  })
+                },24000);
               }
           }
         },5000);
 
-        var linkCollectionInterval =  setInterval(()=>{
-          newWindow.webContents.executeJavaScript('localStorage.getItem("iHaveLinks")').then( data =>{
-              if(data == 1){
-                  newWindow.webContents.executeJavaScript('localStorage.setItem("iHaveLinks", 0)');
-                  newWindow.webContents.executeJavaScript('localStorage.getItem("linkToAppend")').then(linkCollectionToAppend =>{
-                  appendToLinkCollection(linkCollectionToAppend, newWindow);
-                });
-              }
-            });
-        },10000);
-          
-        var idleTimeInterval = setInterval(()=>{
-          newWindow.webContents.executeJavaScript('localStorage.getItem("am-I-Idle?")').then(data =>{
-            if(data == 1){
-              clearInterval(linkCollectionInterval);
-              clearInterval(idleTimeInterval);
-              newWindow.loadURL("https://www.linkedin.com/m/logout");
-              newWindow.close();
-              setTimeout(()=>{
-                appReadyCall();
-              },cycleRandomVariable = cycleRandom());
-            }
-          })
-        },24000);
+
       }
     });
   }
