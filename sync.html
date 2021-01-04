@@ -39,8 +39,90 @@
             <div id="loadingColor" class="nerko"></div>
         </div>
     </div>
+    <div class="center">
+        <div class="btn-1">
+          <a href="bugreport.html"><span>Report Bug</span></a>
+        </div>
 
 </body>
+<style>
+    .btn-1 {
+	width: 200px;
+	height: 100px;
+	background-color: rgb(255, 255, 255);
+	
+	position: absolute;
+	top:600px;
+	bottom: 0;
+	left: 1200px;
+	right: 0;
+	margin: auto;
+}
+</style>
+<style>
+    body {
+  background: #ffffff;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  color: #ffffff;
+}
+
+.btn-1{
+  justify-content: center;
+  align-items: center;
+}
+footer a,
+.btn-1 a{
+  text-decoration: none;
+  border: 2px solid #3e3bda;
+  padding: 15px;
+  color: rgb(85, 74, 236);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: relative;
+  display: inline-block;
+}
+
+span {
+  position: relative;
+  /* z-index coz when we put bg to before and after this span text will not be visible */
+  z-index: 3;
+}
+
+.btn-1 a::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: -2px;
+  width: calc(100% + 6px);
+  /*100% plus double the times left values*/
+  height: calc(100% - 10px);
+  background-color: #ffffff;
+  transition: all 0.5s ease-in-out;
+  transform: scaleY(1);
+}
+
+.btn-1 a:hover::before{
+  transform: scaleY(0);
+}
+
+.btn-1 a::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: -5px;
+  width: calc(100% - 10px);
+  /*100% plus double the times left values*/
+  height: calc(100% + 10px);
+  background-color: #ffffff;
+  transition: all 0.5s ease-in-out;
+  transform: scaleX(1);
+}
+
+.btn-1 a:hover::after{
+  transform: scaleX(0);
+}
+
+</style>
 <style>
     #outlineBar {
         margin: 0 auto;
