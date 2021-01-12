@@ -4,7 +4,7 @@ const path = require('path');
 const CryptoJS = require('crypto-js');
 const {autoUpdater} = require("electron-updater");
 const log = require('electron-log');
-const $ = require('jquery');
+const jq = require('jquery');
 
 
 var updateCheck = true;
@@ -396,7 +396,7 @@ app.whenReady().then(() => {
             userID = data;
 
 
-            $.ajax({
+          jq.ajax({
               type: "POST",
               url: "https://loopo.onblick.com/api/im-alive/"+userID,
               success: function (response) {
