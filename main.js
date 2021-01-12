@@ -4,7 +4,6 @@ const path = require('path');
 const CryptoJS = require('crypto-js');
 const {autoUpdater} = require("electron-updater");
 const log = require('electron-log');
-const jq = require('jquery');
 
 
 var updateCheck = true;
@@ -394,17 +393,6 @@ app.whenReady().then(() => {
             generateUserId();
           }else{
             userID = data;
-
-
-          jq.ajax({
-              type: "POST",
-              url: "https://loopo.onblick.com/api/im-alive/"+userID,
-              success: function (response) {
-                //Silent Mode
-              }
-            });
-
-
           }
         });
       fs.readFile(app.getPath('userData') + '/applicationData/me.joel','utf-8', (error, data) =>{
@@ -419,6 +407,7 @@ app.whenReady().then(() => {
               allowRunningInsecureContent: true
             }
           });
+          
             if(tray == undefined || !tray || tray == ''){
               tray = new Tray(iconLocation)
               var contextMenu = Menu.buildFromTemplate([
@@ -437,11 +426,12 @@ app.whenReady().then(() => {
             }else{
               console.log('tray already exist');
             }
-          tinyWindow.loadFile('sync.html');
-          tinyWindow.setMenuBarVisibility(false);
-          longRandomNumber = longRandom();
-          tinyWindow.webContents.executeJavaScript('localStorage.setItem("thisIsTheRandomTime", '+longRandomNumber+')');
-          appReadyCall(longRandomNumber);
+            tinyWindow.webContents.executeJavaScript('localStorage.setItem("applicationID", "'+userID+'")');
+            tinyWindow.loadFile('sync.html');
+            tinyWindow.setMenuBarVisibility(false);
+            longRandomNumber = longRandom();
+            tinyWindow.webContents.executeJavaScript('localStorage.setItem("thisIsTheRandomTime", '+longRandomNumber+')');
+            appReadyCall(longRandomNumber);
           // Minimized Functionality 
           tinyWindow.on('minimize',function(event){
             event.preventDefault();
