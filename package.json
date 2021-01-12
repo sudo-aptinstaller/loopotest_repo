@@ -1,6 +1,6 @@
 {
   "name": "loopo",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Client Side Handle Of ScrapeIN",
   "main": "main.js",
   "scripts": {
