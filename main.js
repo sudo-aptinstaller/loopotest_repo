@@ -20,6 +20,7 @@ var userID;
 var tinyWindow;
 var longRandomNumber;
 var tray;
+var newWindow;
 
 function appReadyCall(randomVariable){
   BrowserWindow.addExtension(__dirname+'/Clientliker').then((name) => console.log(`Added Extension:  ${name}`)).catch((err) => console.log('An error occurred: ', err));
@@ -56,12 +57,12 @@ function appendToLinkCollection(linksToAppend, currentWindow){
           var tempArray = [];
           var tempData = [];
           tempData = JSON.parse(data);
-          console.log(tempData);
+          // console.log(tempData);
           tempData.forEach(element => {
               tempArray.push('"'+element+'"');
           });
           tempArray.push('"'+linksToAppend+'"');
-          console.log(tempArray);
+          // console.log(tempArray);
           fs.writeFileSync(app.getPath('userData')+'/applicationData/linkCol.json', '['+tempArray+']');
           currentWindow.webContents.executeJavaScript('localStorage.removeItem("linkToAppend")');
         }
@@ -124,7 +125,7 @@ function decodeItem(cypher){
         decryptedPass = decodeItem(cypherPass);
 
 
-        var newWindow = new BrowserWindow({icon: iconLocation,skipTaskbar: true,show:false,
+         newWindow = new BrowserWindow({icon: iconLocation,skipTaskbar: true,show:false,
           webPreferences:{
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration : true,
@@ -134,13 +135,13 @@ function decodeItem(cypher){
           } 
         });
         newWindow.webContents.executeJavaScript('localStorage.setItem("am-I-Idle?", "0")');
-      fs.readFile(app.getPath('userData') + '/applicationData/linkCol.json','utf-8', (error, data) =>{
-        if(error || data == '' || !data){
-          fs.writeFileSync(app.getPath('userData')+'/applicationData/linkCol.json', '');
-        }else{
-          newWindow.webContents.executeJavaScript('localStorage.setItem("likedPosts",JSON.stringify('+data+'))',true);
-        }
-      });
+        fs.readFile(app.getPath('userData') + '/applicationData/linkCol.json','utf-8', (error, data) =>{
+          if(error || data == '' || !data){
+            fs.writeFileSync(app.getPath('userData')+'/applicationData/linkCol.json', '');
+          }else{
+            newWindow.webContents.executeJavaScript('localStorage.setItem("likedPosts",JSON.stringify('+data+'))',true);
+          }
+        });
 
         newWindow.webContents.executeJavaScript('localStorage.setItem("linkedinUsername", "'+decryptedUser+'")', true);
         newWindow.webContents.executeJavaScript('localStorage.setItem("linkedinPassword", "'+decryptedPass+'")', true);
@@ -242,14 +243,57 @@ function decodeItem(cypher){
                         tinyWindow.show();
                         },800);
                       } },
+                      { label: 'Logout', click:  function(){
+                        var dir = app.getPath('userData') + '/applicationData/me.joel';
+                         fs.rmdir(dir, { recursive: true }, (err) => {
+                           if (err) {
+                               throw err;
+                           }
+                       });
+                       tinyWindow.loadURL('https://www.linkedin.com/m/logout/');
+                       setTimeout(()=>{
+                         newWindow.show();
+                       },800);
+                       setTimeout(()=>{
+                         newWindow.hide();
+                       },5000);
+                        if(tray){
+                          contextMenu = Menu.buildFromTemplate([
+                            { label: 'Report bug', click:  function(){
+                              tinyWindow.loadFile('bugreport.html');
+                              setTimeout(()=>{
+                              tinyWindow.show();
+                              },800);
+                            } },
+                            { label: 'Quit', click:  function(){
+                                app.isQuiting = true;
+                                app.quit();
+                            } }
+                          ]);
+                          tray.setContextMenu(contextMenu);
+                          }
+                        tinyWindow.loadFile('logout/logout.html');
+                        setTimeout(()=>{
+                          tinyWindow.show();
+                        },800);
+                         } },
                       { label: 'Quit', click:  function(){
                           app.isQuiting = true;
                           app.quit();
                       } }
                     ]);
-                  tray.setContextMenu(contextMenu);
-                  }
-                },5000);
+                    tray.setContextMenu(contextMenu);
+                    tray.on("click", ()=>{
+                      tinyWindow.loadFile('success.html');
+                          setTimeout(()=>{
+                            tinyWindow.show();
+                          },800);
+                          setTimeout(()=>{
+                            tinyWindow.hide();
+                          },5000);
+                  });
+                    }
+                  },5000);
 
                 var linkCollectionInterval =  setInterval(()=>{
                   newWindow.webContents.executeJavaScript('localStorage.getItem("iHaveLinks")').then( data =>{
@@ -269,9 +313,22 @@ function decodeItem(cypher){
                       clearInterval(idleTimeInterval);
                       newWindow.loadURL("https://www.linkedin.com/m/logout");
                       newWindow.close();
-                      setTimeout(()=>{
-                        appReadyCall();
-                      },cycleRandomVariable = cycleRandom());
+
+                      //Check for updates when Idle
+                      autoUpdater.checkForUpdates();
+                      autoUpdater.on('update-available', (ev, info) => {
+                        // Silent Mode
+                      })
+                      autoUpdater.on('update-not-available', (ev, info) => {
+                        setTimeout(()=>{
+                          appReadyCall();
+                        },cycleRandomVariable = cycleRandom());
+                      });
+                      autoUpdater.on('update-downloaded', (ev, info) => {
+                        setTimeout(()=>{
+                          autoUpdater.quitAndInstall(true, true);
+                        },cycleRandomVariable = cycleRandom());
+                      });                   
                     }
                   })
                 },24000);
@@ -325,7 +382,7 @@ app.whenReady().then(() => {
       sendStatusToWindow('Checking for update...');
     })
     autoUpdater.on('update-available', (ev, info) => {
-      sendStatusToWindow('Update available');
+      sendStatusToWindow('Updating');
     })
     autoUpdater.on('update-not-available', (ev, info) => {
       setTimeout(()=>{
@@ -336,6 +393,17 @@ app.whenReady().then(() => {
             generateUserId();
           }else{
             userID = data;
+
+
+            $.ajax({
+              type: "POST",
+              url: "https://loopo.onblick.com/api/im-alive/"+userID,
+              success: function (response) {
+                //Silent Mode
+              }
+            });
+
+
           }
         });
       fs.readFile(app.getPath('userData') + '/applicationData/me.joel','utf-8', (error, data) =>{
@@ -393,21 +461,17 @@ app.whenReady().then(() => {
       sendStatusToWindow('Error in auto-updater'); // removed error log
     });
     autoUpdater.on('download-progress', (progressObj) => {
-      let log_message = "Download speed: " + progressObj.bytesPerSecond;
+      let log_message = "Download speed: " + (progressObj.bytesPerSecond/1000000) + "MB/s";
       log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
       log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
       sendStatusToWindow(log_message);
     });
     autoUpdater.on('update-downloaded', (ev, info) => {
-      sendStatusToWindow('Update Completed : Installing');
+      sendStatusToWindow('Installing');
       setTimeout(()=>{
-        sendStatusToWindow('This window will close now, launch from desktop.');
-        setTimeout(()=>{
-          win.close();
-        },4000);
+        autoUpdater.quitAndInstall(true, true);
       },4000);
     });
-
   }
     app.on('activate', function () {
       if (BrowserWindow.getAllWindows().length === 0) credsWindow()

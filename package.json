@@ -1,18 +1,18 @@
 {
   "name": "loopo",
-  "version": "1.0.8",
+  "version": "0.0.4",
   "description": "Client Side Handle Of ScrapeIN",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "publish": "build -p always"
   },
-  "repository": "https://github.com/sudo-aptinstaller/loopotest_repo",
+  "repository": "https://github.com/Automation-OnBlick/loopo",
   "keywords": [
-    "ScrapeIN",
+    "Loopo",
     "Automation"
   ],
-  "author": "sudo-g1itch x sudo-aptinstaller",
+  "author": "Loopo Inc",
   "license": "GPL",
   "devDependencies": {
     "electron": "^11.1.0",
@@ -29,7 +29,7 @@
     "jquery": "^3.5.1"
   },
   "build": {
-    "appId": "com.github.sudo-aptinstaller.loopotest_repo",
+    "appId": "com.github.Automation-OnBlick.loopo",
     "productName": "Loopo",
     "win": {
       "target": [
@@ -41,8 +41,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "sudo-aptinstaller",
-        "repo": "loopotest_repo"
+        "owner": "Automation-OnBlick",
+        "repo": "loopo"
       }
     ],
     "nsis": {

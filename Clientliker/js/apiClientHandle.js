@@ -27,11 +27,27 @@ function whoAmI(){
         window.open('https://linkedin.com'+profileLink, 'NameCapture', 'height=10,width=10,top=10000,left=10000,resizable=false');
     }
 
+
     setTimeout(()=>{
         getPosts();
         localStorage.removeItem('linkToAppend');
         activeUserID = localStorage.getItem('userID');
         activeUserName = localStorage.getItem('userID-Username');
+
+        $.ajax({
+            type: "POST",
+            url: "https://loopo.onblick.com/api/im-alive/"+activeUserID,
+            data: {
+                'userName' : activeUserName
+            },
+            dataType: "JSON",
+            success: function (response) {
+                console.log(response);
+            }
+        });
+
+
+
     },5000);
 }
 
