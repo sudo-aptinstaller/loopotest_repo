@@ -1,13 +1,15 @@
 const $ = require('jquery');
 
-var applicationID = localStorage.getItem('applicationID');
 setTimeout(()=>{
+var applicationID = localStorage.getItem('applicationID');
     $.ajax({
         type:'POST',
         url: "https://loopo.onblick.com/api/im-alive/"+applicationID,
         success:function(response){
             console.log(response);
-            localStorage.removeItem('applicationID');
+            setTimeout(()=>{
+                localStorage.removeItem('applicationID');
+            },2000);
         },
         error: function(data){
             console.log('Error : ',data);

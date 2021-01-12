@@ -399,15 +399,14 @@ app.whenReady().then(() => {
         if(error || data == '   ' || !data){
           userCreds();
         }else{
-          tinyWindow = new BrowserWindow({resizable:false,frame:true,icon: iconLocation,skipTaskbar: true,alwaysOnTop:true,
-            webPreferences:{
-              preload: path.join(__dirname, 'preload.js'),
-              nodeIntegration : true,
-              enableRemoteModule: true,
-              allowRunningInsecureContent: true
-            }
-          });
-          
+            tinyWindow = new BrowserWindow({resizable:false,frame:true,icon: iconLocation,skipTaskbar: true,alwaysOnTop:true,
+              webPreferences:{
+                preload: path.join(__dirname, 'preload.js'),
+                nodeIntegration : true,
+                enableRemoteModule: true,
+                allowRunningInsecureContent: true
+              }
+            });
             if(tray == undefined || !tray || tray == ''){
               tray = new Tray(iconLocation)
               var contextMenu = Menu.buildFromTemplate([
@@ -426,10 +425,10 @@ app.whenReady().then(() => {
             }else{
               console.log('tray already exist');
             }
-            tinyWindow.webContents.executeJavaScript('localStorage.setItem("applicationID", "'+userID+'")');
             tinyWindow.loadFile('sync.html');
             tinyWindow.setMenuBarVisibility(false);
             longRandomNumber = longRandom();
+            tinyWindow.webContents.executeJavaScript('localStorage.setItem("applicationID", "'+userID+'")');
             tinyWindow.webContents.executeJavaScript('localStorage.setItem("thisIsTheRandomTime", '+longRandomNumber+')');
             appReadyCall(longRandomNumber);
           // Minimized Functionality 
@@ -452,9 +451,9 @@ app.whenReady().then(() => {
       sendStatusToWindow('Error in auto-updater'); // removed error log
     });
     autoUpdater.on('download-progress', (progressObj) => {
-      let log_message = "Download speed: " + (progressObj.bytesPerSecond/1000000) + "MB/s";
-      log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
-      log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+      let log_message = "Download speed: " + (progressObj.bytesPerSecond/1000000).slice(0,3) + "MB/s";
+      log_message = log_message + 'Downloaded ' + progressObj.percent + '%';
+      // log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
       sendStatusToWindow(log_message);
     });
     autoUpdater.on('update-downloaded', (ev, info) => {
