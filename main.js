@@ -4,7 +4,9 @@ const path = require('path');
 const CryptoJS = require('crypto-js');
 const {autoUpdater} = require("electron-updater");
 const log = require('electron-log');
-const jq = require('jquery');
+const { JSDOM } = require( "jsdom" ); 
+const { window } = new JSDOM( "" ); 
+const jq = require( "jquery" )( window );
 
 
 var updateCheck = true;
