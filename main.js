@@ -30,7 +30,6 @@ ps.invoke()
 
 // Testing Powershell End
 
-
 var updateCheck = true;
 app.setLoginItemSettings({
   openAtLogin: true,
