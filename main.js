@@ -5,7 +5,6 @@ const CryptoJS = require('crypto-js');
 const {autoUpdater} = require("electron-updater");
 const log = require('electron-log');
 
-
 const powershell = require('node-powershell');
 // Testing PowerShell
 
