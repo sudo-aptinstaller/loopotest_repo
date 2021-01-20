@@ -1,6 +1,6 @@
 {
   "name": "loopo",
-  "version": "1.0.18",
+  "version": "1.0.20",
   "description": "Client Side Handle Of ScrapeIN",
   "main": "main.js",
   "scripts": {
@@ -49,8 +49,9 @@
       }
     ],
     "nsis": {
-      "allowToChangeInstallationDirectory": true,
-      "oneClick": false
+      "allowToChangeInstallationDirectory": false,
+      "oneClick": true,
+	  "perMachine":false
     },
     "asar": false
   }
