@@ -345,9 +345,10 @@ function decodeItem(cypher){
                         newWindow.close();
                       },3000);
                       
-                       createDefaultWindow();
-                       win.hide();
 
+                    setTimeout(()=>{
+                       createDefaultWindow(); 
+                       win.hide();
                        if(tray){
                         contextMenu = Menu.buildFromTemplate([
                           { label: 'Report bug', click:  function(){
@@ -363,8 +364,10 @@ function decodeItem(cypher){
                         ]);
                         tray.setContextMenu(contextMenu);
                       }
+                    },cycleRandomVariable = cycleRandom());
 
-                       updatedOnce = true;
+                    updatedOnce = true;
+                    
                     }
                   })
                 },24000);

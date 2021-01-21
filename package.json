@@ -1,6 +1,6 @@
 {
   "name": "loopo",
-  "version": "1.0.29",
+  "version": "1.0.30",
   "description": "Standalone AutoLiker For LinkedIn",
   "main": "main.js",
   "scripts": {
