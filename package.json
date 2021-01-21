@@ -1,7 +1,7 @@
 {
   "name": "loopo",
-  "version": "1.0.20",
-  "description": "Client Side Handle Of ScrapeIN",
+  "version": "1.0.29",
+  "description": "Standalone AutoLiker For LinkedIn",
   "main": "main.js",
   "scripts": {
     "start": "electron .",

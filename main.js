@@ -2,7 +2,7 @@ const {app, BrowserWindow, Menu, Tray} = require('electron');
 const fs = require('fs');
 const path = require('path');
 const CryptoJS = require('crypto-js');
-const {autoUpdater} = require("electron-updater");
+const { autoUpdater } = require("electron-updater");
 const log = require('electron-log');
 
 const powershell = require('node-powershell');
@@ -30,14 +30,14 @@ ps.invoke()
 });
 
 // Testing Powershell End
-
+var updatedOnce = false;
 var updateCheck = true;
 app.setLoginItemSettings({
   openAtLogin: true,
   path: app.getPath('exe')
 });
 
-
+var updateTimeout;
 const iconLocation = path.join(__dirname, '/icons/icon.ico');
 var usernameError;
 var passwordError;
@@ -296,7 +296,7 @@ function decodeItem(cypher){
                             } }
                           ]);
                           tray.setContextMenu(contextMenu);
-                          }
+                        }
                         tinyWindow.loadFile('logout/logout.html');
                         setTimeout(()=>{
                           tinyWindow.show();
@@ -334,26 +334,37 @@ function decodeItem(cypher){
                 var idleTimeInterval = setInterval(()=>{
                   newWindow.webContents.executeJavaScript('localStorage.getItem("am-I-Idle?")').then(data =>{
                     if(data == 1){
+
                       clearInterval(linkCollectionInterval);
                       clearInterval(idleTimeInterval);
-                      newWindow.loadURL("https://www.linkedin.com/m/logout");
-                      newWindow.close();
 
-                      //Check for updates when Idle
-                      autoUpdater.checkForUpdates();
-                      autoUpdater.on('update-available', (ev, info) => {
-                        // Silent Mode
-                      })
-                      autoUpdater.on('update-not-available', (ev, info) => {
-                        setTimeout(()=>{
-                          appReadyCall();
-                        },cycleRandomVariable = cycleRandom());
-                      });
-                      autoUpdater.on('update-downloaded', (ev, info) => {
-                        setTimeout(()=>{
-                          autoUpdater.quitAndInstall(true, true);
-                        },cycleRandomVariable = cycleRandom());
-                      });                   
+
+                      newWindow.loadURL("https://www.linkedin.com/m/logout");
+
+                      setTimeout(()=>{
+                        newWindow.close();
+                      },3000);
+                      
+                       createDefaultWindow();
+                       win.hide();
+
+                       if(tray){
+                        contextMenu = Menu.buildFromTemplate([
+                          { label: 'Report bug', click:  function(){
+                            tinyWindow.loadFile('bugreport.html');
+                            setTimeout(()=>{
+                            tinyWindow.show();
+                            },800);
+                          } },
+                          { label: 'Quit', click:  function(){
+                              app.isQuiting = true;
+                              app.quit();
+                          } }
+                        ]);
+                        tray.setContextMenu(contextMenu);
+                      }
+
+                       updatedOnce = true;
                     }
                   })
                 },24000);
@@ -378,13 +389,15 @@ log.info('App starting...');
 
 let win;
 
-function sendStatusToWindow(text) {
+
+
+function sendStatusToWindow(text,windowName) {
   log.info(text);
-  win.webContents.send('message', text);
+  windowName.webContents.send('message', text);
 }
 
 function createDefaultWindow() {
-  win = new BrowserWindow({frame:false,height:400,width:300,
+  win = new BrowserWindow({frame:false,height:455,width:300,
     webPreferences:{
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration : true,
@@ -395,20 +408,27 @@ function createDefaultWindow() {
   win.loadURL(`file://${__dirname}/version.html#v${app.getVersion()}`);
   return win;
 }
+
  
 app.whenReady().then(() => {
 
   if(updateCheck == true){
     updateCheck != updateCheck;
+
     createDefaultWindow();
-    autoUpdater.checkForUpdates();
+
+    updateTimeout = setInterval(()=>{
+
+      autoUpdater.checkForUpdates();
+
+    },6000);
 
     autoUpdater.on('checking-for-update', () => {
-      sendStatusToWindow('Checking for update...');
-    })
+      sendStatusToWindow('Checking for update...',win);
+    });
     autoUpdater.on('update-available', (ev, info) => {
-      sendStatusToWindow('Updating');
-    })
+      sendStatusToWindow('Updating',win);
+    });
     autoUpdater.on('update-not-available', (ev, info) => {
       setTimeout(()=>{
         win.close();
@@ -432,6 +452,9 @@ app.whenReady().then(() => {
                 allowRunningInsecureContent: true
               }
             });
+            if(updatedOnce == true){
+              tinyWindow.hide();
+            }
             if(tray == undefined || !tray || tray == ''){
               tray = new Tray(iconLocation)
               var contextMenu = Menu.buildFromTemplate([
@@ -473,16 +496,16 @@ app.whenReady().then(() => {
       });
     });
     autoUpdater.on('error', (ev, err) => {
-      sendStatusToWindow('Error in auto-updater'); // removed error log
+      sendStatusToWindow('Error in auto-updater',win); // removed error log
     });
     autoUpdater.on('download-progress', (progressObj) => {
       let log_message = "Download speed: " + (progressObj.bytesPerSecond/1000000).slice(0,3) + "MB/s";
       log_message = log_message + 'Downloaded ' + progressObj.percent + '%';
       // log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-      sendStatusToWindow(log_message);
+      sendStatusToWindow(log_message,win);
     });
     autoUpdater.on('update-downloaded', (ev, info) => {
-      sendStatusToWindow('Installing');
+      sendStatusToWindow('Installing',win);
       setTimeout(()=>{
         autoUpdater.quitAndInstall(true, true);
       },4000);
