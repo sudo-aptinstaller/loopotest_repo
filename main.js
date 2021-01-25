@@ -106,14 +106,14 @@ function randomString(length) {
 }
 
 function longRandom(){
-  var max = 80000;
-  var min = 10000;
+  var max = 800000;
+  var min = 100000;
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 
 function cycleRandom(){
-  return Math.floor(Math.random() * (270000 - 180000 + 1) + 180000);
+  return Math.floor(Math.random() * (2700000 - 1800000 + 1) + 1800000);
 }
 function encodeItem(text) {
   return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
