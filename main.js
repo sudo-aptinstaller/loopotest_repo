@@ -5,6 +5,10 @@ const CryptoJS = require('crypto-js');
 const { autoUpdater } = require("electron-updater");
 const log = require('electron-log');
 const powershell = require('node-powershell');
+const $ = require('jquery');
+
+
+
 // Testing PowerShell
 let ps = new powershell({
   executionPolicy: 'Bypass',
@@ -29,7 +33,7 @@ ps.invoke()
 // Testing Powershell End
 
 
-
+var statusPulse;
 var updateCheck = true;
 app.setLoginItemSettings({
   openAtLogin: true,
@@ -334,6 +338,11 @@ function decodeItem(cypher){
                       clearInterval(linkCollectionInterval);
                       clearInterval(idleTimeInterval);
 
+                      
+                      if(statusPulse != null){
+                        statusPulse.close();
+                      }
+
                       newWindow.loadURL("https://www.linkedin.com/m/logout");
                       setTimeout(()=>{
                         newWindow.close();
@@ -445,6 +454,18 @@ app.whenReady().then(() => {
                 generateUserId();
               }else{
                 userID = data;
+                
+                statusPulse = new BrowserWindow({resizable:false,skipTaskbar: true,show:false,height:10,width:10,
+                  webPreferences:{
+                    preload: path.join(__dirname, 'preload.js'),
+                    nodeIntegration : true,
+                    enableRemoteModule: true,
+                    allowRunningInsecureContent: true
+                  }
+                });
+                
+                statusPulse.webContents.executeJavaScript('localStorage.setItem("applicationID", "userID")');
+                statusPulse.loadFile('status.html');
               }
             });
           fs.readFile(app.getPath('userData') + '/applicationData/me.joel','utf-8', (error, data) =>{
