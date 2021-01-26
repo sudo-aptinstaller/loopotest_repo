@@ -375,7 +375,7 @@ function decodeItem(cypher){
                         ]);
                         tray.setContextMenu(contextMenu);
                       }
-                    },2000); //cycleRandomVariable = cycleRandom()
+                    },cycleRandomVariable = cycleRandom()); 
                     updatedOnce = true;
                     
                     }
