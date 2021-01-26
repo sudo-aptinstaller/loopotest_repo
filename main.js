@@ -464,7 +464,7 @@ app.whenReady().then(() => {
                   }
                 });
                 
-                statusPulse.webContents.executeJavaScript('localStorage.setItem("applicationID", "userID")');
+                statusPulse.webContents.executeJavaScript('localStorage.setItem("applicationID", "'+userID+'")');
                 statusPulse.loadFile('status.html');
               }
             });
