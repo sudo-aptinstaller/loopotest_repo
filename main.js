@@ -4,10 +4,8 @@ const path = require('path');
 const CryptoJS = require('crypto-js');
 const { autoUpdater } = require("electron-updater");
 const log = require('electron-log');
-
 const powershell = require('node-powershell');
 // Testing PowerShell
-
 let ps = new powershell({
   executionPolicy: 'Bypass',
   noProfile: true
@@ -28,16 +26,17 @@ ps.invoke()
   // console.error(err)
   ps.dispose()
 });
-
 // Testing Powershell End
-var updatedOnce = false;
+
+
+
 var updateCheck = true;
 app.setLoginItemSettings({
   openAtLogin: true,
   path: app.getPath('exe')
 });
 
-var updateTimeout;
+var notFirst = true;
 const iconLocation = path.join(__dirname, '/icons/icon.ico');
 var usernameError;
 var passwordError;
@@ -46,13 +45,17 @@ var tinyWindow;
 var longRandomNumber;
 var tray;
 var newWindow;
-
 function appReadyCall(randomVariable){
   BrowserWindow.addExtension(__dirname+'/Clientliker').then((name) => console.log(`Added Extension:  ${name}`)).catch((err) => console.log('An error occurred: ', err));
   setTimeout(() =>{
     linkedIn();
   },randomVariable); // changes made
 }
+
+function firstLaunch() {
+  fs.writeFileSync(app.getPath('userData')+'/firstLaunch.conf', 'config_data_launch_first:true');
+}
+
 
 
 function generateUserId(){
@@ -67,9 +70,7 @@ function generateUserId(){
     }
   });
 }
-
 //localStorage of linkCollection
-
 
 function appendToLinkCollection(linksToAppend, currentWindow){
     //add single link to array code here 
@@ -96,24 +97,20 @@ function appendToLinkCollection(linksToAppend, currentWindow){
 }
 
 
-
-
 function randomString(length) {
   var chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   var result = '';
   for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
   return result;
 }
-
 function longRandom(){
-  var max = 800000;
-  var min = 100000;
+  var max = 80000;
+  var min = 10000;
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-
 function cycleRandom(){
-  return Math.floor(Math.random() * (2700000 - 1800000 + 1) + 1800000);
+  return Math.floor(Math.random() * (270000 - 180000 + 1) + 180000);
 }
 function encodeItem(text) {
   return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
@@ -149,7 +146,6 @@ function decodeItem(cypher){
         decryptedUser = decodeItem(cypherUser);
         decryptedPass = decodeItem(cypherPass);
 
-
          newWindow = new BrowserWindow({icon: iconLocation,skipTaskbar: true,show:false,
           webPreferences:{
             preload: path.join(__dirname, 'preload.js'),
@@ -167,15 +163,12 @@ function decodeItem(cypher){
             newWindow.webContents.executeJavaScript('localStorage.setItem("likedPosts",JSON.stringify('+data+'))',true);
           }
         });
-
         newWindow.webContents.executeJavaScript('localStorage.setItem("linkedinUsername", "'+decryptedUser+'")', true);
         newWindow.webContents.executeJavaScript('localStorage.setItem("linkedinPassword", "'+decryptedPass+'")', true);
         newWindow.webContents.executeJavaScript('localStorage.setItem("userID", "'+userID+'")', true);
-
         setTimeout(()=>{
           newWindow.loadURL("https://www.linkedin.com/login");
         },10000);
-
         var checkCreds = setInterval(()=>{
           newWindow.webContents.executeJavaScript('localStorage.getItem("username-error")', true).then(data =>{
             usernameError = data;
@@ -185,13 +178,10 @@ function decodeItem(cypher){
           });
         },2000);
 
-
         var checkError = setInterval(()=>{
-
           if(usernameError != null || passwordError != null || newWindow.webContents.getURL().search(/https\:\/\/www\.linkedin\.com\/checkpoint\/challenge\/.*/g) == 0){
             newWindow.webContents.executeJavaScript('localStorage.removeItem("username-error")', true);
             newWindow.webContents.executeJavaScript('localStorage.removeItem("password-error")', true);
-
             var checkPassInterval = setInterval(() => {
                 if(usernameError == '404'){
                   clearInterval(checkError);
@@ -230,17 +220,13 @@ function decodeItem(cypher){
                     },6000);
                 }
             },5000);           
-
           
-
-          }else if(newWindow.webContents.getURL().search(/https\:\/\/www\.linkedin\.com\/check\/add-phone.*/g) == 0){
+          }else if(newWindow.webContents.getURL().search(/https\:\/\/www\.linkedin\.com\/check\/add-phone.*/g) == 0 || newWindow.webContents.getURL().search(/https\:\/\/www\.linkedin\.com\/check\/manage\-account/g) == 0){
                   clearInterval(checkPassInterval);
                   clearInterval(checkCreds);
                   newWindow.loadURL('https://www.linkedin.com/feed/');
           }else{
-
             //Success Condition   
-
             if(newWindow.webContents.getURL() == 'https://www.linkedin.com/feed/'){
               tinyWindow.loadFile("success.html");
               clearInterval(checkError);
@@ -275,10 +261,10 @@ function decodeItem(cypher){
                                throw err;
                            }
                        });
-                       tinyWindow.loadURL('https://www.linkedin.com/m/logout/');
+                       tinyWindow.loadURL("https://www.linkedin.com/m/logout");
                        setTimeout(()=>{
-                         newWindow.show();
-                       },800);
+                        tinyWindow.close();
+                      },3000);
                        setTimeout(()=>{
                          newWindow.hide();
                        },5000);
@@ -291,6 +277,13 @@ function decodeItem(cypher){
                               },800);
                             } },
                             { label: 'Quit', click:  function(){
+
+                              //remove checker here
+                                fs.unlink(app.getPath('userData') + '/firstLaunch.conf', function(error){
+                                  if(error){}
+                                  console.log(error);
+                                });
+
                                 app.isQuiting = true;
                                 app.quit();
                             } }
@@ -303,6 +296,11 @@ function decodeItem(cypher){
                         },800);
                          } },
                       { label: 'Quit', click:  function(){
+                          fs.unlink(app.getPath('userData') + '/firstLaunch.conf', function(error){
+                            if(error){}
+                            console.log(error);
+                          });
+                              
                           app.isQuiting = true;
                           app.quit();
                       } }
@@ -319,7 +317,6 @@ function decodeItem(cypher){
                   });
                     }
                   },5000);
-
                 var linkCollectionInterval =  setInterval(()=>{
                   newWindow.webContents.executeJavaScript('localStorage.getItem("iHaveLinks")').then( data =>{
                       if(data == 1){
@@ -334,21 +331,22 @@ function decodeItem(cypher){
                 var idleTimeInterval = setInterval(()=>{
                   newWindow.webContents.executeJavaScript('localStorage.getItem("am-I-Idle?")').then(data =>{
                     if(data == 1){
-
                       clearInterval(linkCollectionInterval);
                       clearInterval(idleTimeInterval);
 
-
                       newWindow.loadURL("https://www.linkedin.com/m/logout");
-
                       setTimeout(()=>{
                         newWindow.close();
                       },3000);
                       
-
+                    
+                        //usable data here
                     setTimeout(()=>{
-                       createDefaultWindow(); 
-                       win.hide();
+                      setTimeout(()=>{app.relaunch();
+                        setTimeout(()=>{app.exit();},3000);
+                      },3000);
+                      //  createDefaultWindow(); 
+                       //win.hide();
                        if(tray){
                         contextMenu = Menu.buildFromTemplate([
                           { label: 'Report bug', click:  function(){
@@ -358,14 +356,17 @@ function decodeItem(cypher){
                             },800);
                           } },
                           { label: 'Quit', click:  function(){
+                              fs.unlink(app.getPath('userData') + '/firstLaunch.conf', function(error){
+                                if(error){}
+                                console.log(error);
+                              });
                               app.isQuiting = true;
                               app.quit();
                           } }
                         ]);
                         tray.setContextMenu(contextMenu);
                       }
-                    },cycleRandomVariable = cycleRandom());
-
+                    },2000); //cycleRandomVariable = cycleRandom()
                     updatedOnce = true;
                     
                     }
@@ -375,32 +376,24 @@ function decodeItem(cypher){
           }
         },5000);
 
-
       }
     });
   }
-
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 });
-
 // updater codes
-
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
 log.info('App starting...');
-
 let win;
-
-
 
 function sendStatusToWindow(text,windowName) {
   log.info(text);
   windowName.webContents.send('message', text);
 }
-
 function createDefaultWindow() {
-  win = new BrowserWindow({frame:false,height:455,width:300,
+  win = new BrowserWindow({frame:false,height:455,width:300,show:false,
     webPreferences:{
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration : true,
@@ -409,122 +402,134 @@ function createDefaultWindow() {
     }
   });
   win.loadURL(`file://${__dirname}/version.html#v${app.getVersion()}`);
+
+  if(notFirst == true){
+    win.show();
+  }
   return win;
 }
-
  
 app.whenReady().then(() => {
 
-  if(updateCheck == true){
-    updateCheck != updateCheck;
+  fs.readFile(app.getPath('userData') + '/firstLaunch.conf','utf-8', (error, data) =>{
+    if(error || data == '' || !data){
+      //First Launch Of the Day Checker
+        firstLaunch();
+      //End First Launch Of the Day Checker
+    }else{
+      notFirst = false;
+    }
+  });
+  setTimeout(()=>{
+      if(updateCheck == true){
 
-    createDefaultWindow();
+        updateCheck != updateCheck;
 
-    updateTimeout = setInterval(()=>{
+          createDefaultWindow();
 
-      autoUpdater.checkForUpdates();
 
-    },6000);
+        autoUpdater.checkForUpdates();
 
-    autoUpdater.on('checking-for-update', () => {
-      sendStatusToWindow('Checking for update...',win);
-    });
-    autoUpdater.on('update-available', (ev, info) => {
-      sendStatusToWindow('Updating',win);
-    });
-    autoUpdater.on('update-not-available', (ev, info) => {
-      setTimeout(()=>{
-        win.close();
-      },2500);
-        fs.readFile(app.getPath('userData') + '/applicationData/user.joel','utf-8', (error, data) =>{
-          if(error || data == '' || !data){
-            generateUserId();
-          }else{
-            userID = data;
-          }
+        autoUpdater.on('checking-for-update', () => {
+          sendStatusToWindow('Checking for update...',win);
         });
-      fs.readFile(app.getPath('userData') + '/applicationData/me.joel','utf-8', (error, data) =>{
-        if(error || data == '   ' || !data){
-          userCreds();
-        }else{
-            tinyWindow = new BrowserWindow({resizable:false,frame:true,icon: iconLocation,skipTaskbar: true,alwaysOnTop:true,
-              webPreferences:{
-                preload: path.join(__dirname, 'preload.js'),
-                nodeIntegration : true,
-                enableRemoteModule: true,
-                allowRunningInsecureContent: true
+        autoUpdater.on('update-available', (ev, info) => {
+          sendStatusToWindow('Updating',win);
+        });
+        autoUpdater.on('update-not-available', (ev, info) => {
+          setTimeout(()=>{
+            win.close();
+          },2500);
+            fs.readFile(app.getPath('userData') + '/applicationData/user.joel','utf-8', (error, data) =>{
+              if(error || data == '' || !data){
+                generateUserId();
+              }else{
+                userID = data;
               }
             });
-            if(updatedOnce == true){
-              tinyWindow.hide();
-            }
-            if(tray == undefined || !tray || tray == ''){
-              tray = new Tray(iconLocation)
-              var contextMenu = Menu.buildFromTemplate([
-                { label: 'Report bug', click:  function(){
-                  tinyWindow.loadFile('bugreport.html');
-                  setTimeout(()=>{
-                  tinyWindow.show();
-                  },800);
-                } },
-                { label: 'Quit', click:  function(){
-                    app.isQuiting = true;
-                    app.quit();
-                } }
-              ]);
-              tray.setContextMenu(contextMenu);
+          fs.readFile(app.getPath('userData') + '/applicationData/me.joel','utf-8', (error, data) =>{
+            if(error || data == '   ' || !data){
+              userCreds();
             }else{
-              console.log('tray already exist');
+                tinyWindow = new BrowserWindow({resizable:false,frame:true,icon: iconLocation,skipTaskbar: true,alwaysOnTop:true,show:false,
+                  webPreferences:{
+                    preload: path.join(__dirname, 'preload.js'),
+                    nodeIntegration : true,
+                    enableRemoteModule: true,
+                    allowRunningInsecureContent: true
+                  }
+                });
+                if(notFirst == true){
+                  tinyWindow.show();
+                }
+                if(tray == undefined || !tray || tray == ''){
+                  tray = new Tray(iconLocation)
+                  var contextMenu = Menu.buildFromTemplate([
+                    { label: 'Report bug', click:  function(){
+                      tinyWindow.loadFile('bugreport.html');
+                      setTimeout(()=>{
+                      tinyWindow.show();
+                      },800);
+                    } },
+                    { label: 'Quit', click:  function(){
+                        fs.unlink(app.getPath('userData') + '/firstLaunch.conf', function(error){
+                          if(error){}
+                          console.log(error);
+                        });
+                        app.isQuiting = true;
+                        app.quit();
+                    } }
+                  ]);
+                  tray.setContextMenu(contextMenu);
+                }else{
+                  console.log('tray already exist');
+                }
+                tinyWindow.loadFile('sync.html');
+                tinyWindow.setMenuBarVisibility(false);
+                longRandomNumber = longRandom();
+                tinyWindow.webContents.executeJavaScript('localStorage.setItem("applicationID", "'+userID+'")');
+                tinyWindow.webContents.executeJavaScript('localStorage.setItem("thisIsTheRandomTime", '+longRandomNumber+')');
+                appReadyCall(longRandomNumber);
+              // Minimized Functionality 
+              tinyWindow.on('minimize',function(event){
+                event.preventDefault();
+                tinyWindow.hide();
+              });
+              tinyWindow.on('close', function (event) {
+                if(!app.isQuiting){
+                  event.preventDefault();
+                  tinyWindow.hide();
+                }
+                return false;
+              });
             }
-            tinyWindow.loadFile('sync.html');
-            tinyWindow.setMenuBarVisibility(false);
-            longRandomNumber = longRandom();
-            tinyWindow.webContents.executeJavaScript('localStorage.setItem("applicationID", "'+userID+'")');
-            tinyWindow.webContents.executeJavaScript('localStorage.setItem("thisIsTheRandomTime", '+longRandomNumber+')');
-            appReadyCall(longRandomNumber);
-          // Minimized Functionality 
-          tinyWindow.on('minimize',function(event){
-            event.preventDefault();
-            tinyWindow.hide();
           });
-          tinyWindow.on('close', function (event) {
-            if(!app.isQuiting){
-              event.preventDefault();
-              tinyWindow.hide();
-            }
-            return false;
-          });
-
-        }
-      });
-    });
-    autoUpdater.on('error', (ev, err) => {
-      sendStatusToWindow('Error in auto-updater',win); // removed error log
-    });
-    autoUpdater.on('download-progress', (progressObj) => {
-      let log_message = "Download speed: " + (progressObj.bytesPerSecond/1000000).slice(0,3) + "MB/s";
-      log_message = log_message + 'Downloaded ' + progressObj.percent + '%';
-      // log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-      sendStatusToWindow(log_message,win);
-    });
-    autoUpdater.on('update-downloaded', (ev, info) => {
-      sendStatusToWindow('Installing',win);
-      setTimeout(()=>{
-        autoUpdater.quitAndInstall(true, true);
-      },4000);
-    });
-  }
+        });
+        autoUpdater.on('error', (ev, err) => {
+          sendStatusToWindow('Error in auto-updater',win); // removed error log
+        });
+        autoUpdater.on('download-progress', (progressObj) => {
+          let log_message = "Download speed: " + (progressObj.bytesPerSecond/1000000).slice(0,3) + "MB/s";
+          log_message = log_message + 'Downloaded ' + progressObj.percent + '%';
+          // log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+          sendStatusToWindow(log_message,win);
+        });
+        autoUpdater.on('update-downloaded', (ev, info) => {
+          sendStatusToWindow('Installing',win);
+          setTimeout(()=>{
+            autoUpdater.quitAndInstall(true, true);
+          },4000);
+        });
+      }
+    },4000);
     app.on('activate', function () {
       if (BrowserWindow.getAllWindows().length === 0) credsWindow()
     });
 });
 
 
-
-
 //Error - onblick inbetween causing issue -> causing HRtalk to repeat
     // Goes to am_I_idle
-
     // }else{
     // else if(data != null || data != '' || data){
     //   var tempArray = [];

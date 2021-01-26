@@ -35,7 +35,7 @@
                 document.close();
             }
         </script>
-        <h2 class="nerko" style="color:black"> Syncing</h2>
+        <h2 class="nerko" style="color:black" id="mainTextHolder"> Syncing</h2>
         <div id="outlineBar">
             <div id="loadingColor" class="nerko"></div>
         </div>
@@ -128,7 +128,6 @@ span {
 
     #loadingColor {
         border-radius: 25px !important;
-        width: 25%;
         height: 30px;
         background-color: #0a66c2;
         text-align: center;
@@ -166,6 +165,9 @@ span {
             function frame() {
                 if (width >= mainTotal/100 ) {
                     clearInterval(id);
+                    loadingColor.style.display = 'none';
+                    var mainText = document.getElementById("mainTextHolder");
+                    mainText.innerHTML = 'Finalizing...';
                 } else {
                     percent = (width/(mainTotal/100))*100; 
                     loadingColor.style.width = (percent + 1)+"%";
