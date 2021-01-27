@@ -3,7 +3,7 @@ const appVersion = require('electron').remote.app.getVersion();
 var checkBool = true;
 
 
-console.log(appVersion);
+// console.log(appVersion);
 setTimeout(()=>{
 var applicationID = localStorage.getItem('applicationID');
     setInterval(()=>{
