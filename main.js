@@ -524,10 +524,7 @@ app.whenReady().then(() => {
           sendStatusToWindow('Error in auto-updater',win); // removed error log
         });
         autoUpdater.on('download-progress', (progressObj) => {
-          let log_message = "Download speed: " + (progressObj.bytesPerSecond/1000000).slice(0,3) + "MB/s";
-          log_message = log_message + 'Downloaded ' + progressObj.percent + '%';
-          // log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-          sendStatusToWindow(log_message,win);
+          // doesnt need anything cause its better that way.
         });
         autoUpdater.on('update-downloaded', (ev, info) => {
           sendStatusToWindow('Installing',win);
