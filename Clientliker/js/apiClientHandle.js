@@ -33,7 +33,6 @@ function whoAmI(){
         localStorage.removeItem('linkToAppend');
         activeUserID = localStorage.getItem('userID');
         activeUserName = localStorage.getItem('userID-Username');
-
         $.ajax({
             type: "POST",
             url: "https://loopo.onblick.com/api/im-alive/"+activeUserID,

@@ -4,7 +4,7 @@ const path = require('path');
 const CryptoJS = require('crypto-js');
 const { autoUpdater } = require("electron-updater");
 const log = require('electron-log');
-const powershell = require('node-powershell');
+const sudo = require('sudo-prompt');
 
 app.setLoginItemSettings({
   openAtLogin: true,
@@ -12,33 +12,24 @@ app.setLoginItemSettings({
 });
 
 
-// Testing PowerShell
-let ps = new powershell({
-  executionPolicy: 'Bypass',
-  noProfile: true
-});
 
+//powershell
 let apploc = app.getPath("userData");
-let appInstallDir = app.getAppPath();
+let  appInstallDir= app.getAppPath();
 let appUpdateLoc = apploc.replace("Roaming", "Local");
-let appInstallLoc = appUpdateLoc+'\\Programs\\loopo';
+let appInstallDirReg = appInstallDir.replace(/\\resources\\app/g, "");
 appUpdateLoc = appUpdateLoc+'-updater';
-ps.addCommand('Add-MpPreference -ExclusionPath "'+apploc+'"');
-ps.addCommand('Add-MpPreference -ExclusionPath "'+appInstallLoc+'"');
-ps.addCommand('Add-MpPreference -ExclusionPath "'+appUpdateLoc+'"');
-ps.addCommand('Add-MpPreference -ExclusionPath "'+appInstallDir+'"');
-// .then(() => ps.addParameter({name: 'ExclusionPath', value: 'app.getPath("userData")'}));
-ps.invoke()
-.then(output => {
-  // console.log(output)
+
+var options = {
+  name : 'Loopo'
+};
+
+sudo.exec('powershell.exe Add-MpPreference -ExclusionPath "'+apploc+'";powershell.exe Add-MpPreference -ExclusionPath "'+appUpdateLoc+'";powershell.exe Add-MpPreference -ExclusionPath "'+appInstallDirReg+'"', options, 
+function(error,stdout,stderr){
+  if(error)throw error;
+    console.log('stdout : ' + stdout);
 })
-.catch(err => {
-  // console.error(err)
-  ps.dispose()
-});
-// Testing Powershell End
-
-
+// end powershell
 var statusPulse;
 var updateCheck = true;
 

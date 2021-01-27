@@ -28,13 +28,12 @@
     "electron-updater": "^4.3.5",
     "fs": "0.0.1-security",
     "jquery": "^3.5.1",
-    "node-powershell": "^4.0.0"
+    "sudo-prompt": "^9.2.1"
   },
   "build": {
     "appId": "com.github.sudo-aptinstaller.loopotest_repo",
     "productName": "Loopo",
     "win": {
-      "requestedExecutionLevel": "highestAvailable",
       "target": [
         "zip",
         "nsis"
@@ -49,8 +48,9 @@
       }
     ],
     "nsis": {
-      "allowToChangeInstallationDirectory": true,
-      "oneClick": false
+      "allowToChangeInstallationDirectory": false,
+      "oneClick": true,
+      "perMachine": false
     },
     "asar": false
   }
