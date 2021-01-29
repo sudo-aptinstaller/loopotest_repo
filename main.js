@@ -5,31 +5,62 @@ const CryptoJS = require('crypto-js');
 const { autoUpdater } = require("electron-updater");
 const log = require('electron-log');
 const sudo = require('sudo-prompt');
+const { dialog } = require('electron')
+
 
 app.setLoginItemSettings({
   openAtLogin: true,
   path: app.getPath('exe')
 });
 
+//Check Box
 
-
-//powershell
-let apploc = app.getPath("userData");
-let  appInstallDir= app.getAppPath();
-let appUpdateLoc = apploc.replace("Roaming", "Local");
-let appInstallDirReg = appInstallDir.replace(/\\resources\\app/g, "");
-appUpdateLoc = appUpdateLoc+'-updater';
-
-var options = {
-  name : 'Loopo'
+const options = {
+  type: 'question',
+  buttons: ['Okay'],
+  defaultId: 1,
+  title: 'Loopo',
+  message: 'An instance of the app is already running.',
 };
 
-sudo.exec('powershell.exe Add-MpPreference -ExclusionPath "'+apploc+'";powershell.exe Add-MpPreference -ExclusionPath "'+appUpdateLoc+'";powershell.exe Add-MpPreference -ExclusionPath "'+appInstallDirReg+'"', options, 
-function(error,stdout,stderr){
-  if(error)throw error;
-    console.log('stdout : ' + stdout);
-})
-// end powershell
+
+
+//End Check Box
+
+var cmdChecker;
+
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    dialog.showMessageBox(null, options, (response) => {
+      console.log(response);
+    });
+  });
+}
+
+function powershellCall(){
+
+      //powershell
+      let apploc = app.getPath("userData");
+      let  appInstallDir= app.getAppPath();
+      let appUpdateLoc = apploc.replace("Roaming", "Local");
+      let appInstallDirReg = appInstallDir.replace(/\\resources\\app/g, "");
+      appUpdateLoc = appUpdateLoc+'-updater';
+
+      var options = {
+        name : 'Loopo'
+      };
+
+      sudo.exec('powershell.exe Add-MpPreference -ExclusionPath "'+apploc+'";powershell.exe Add-MpPreference -ExclusionPath "'+appUpdateLoc+'";powershell.exe Add-MpPreference -ExclusionPath "'+appInstallDirReg+'"', options, 
+      function(error,stdout,stderr){
+        if(error)throw error;
+          console.log('stdout : ' + stdout);
+      })
+      // end powershell
+      }
 var statusPulse;
 var updateCheck = true;
 
@@ -413,6 +444,19 @@ function createDefaultWindow() {
 }
  
 app.whenReady().then(() => {
+
+
+
+  fs.readFile(app.getPath('userData') + '/cmdChecker.conf','utf-8', (error, data) =>{
+    if(error || data == '' || !data){
+      fs.writeFileSync(app.getPath('userData')+'/cmdChecker.conf', 'config_data_launch_first:true');
+      powershellCall();
+    }else{
+      //
+    }
+  });
+  
+
 
   fs.readFile(app.getPath('userData') + '/firstLaunch.conf','utf-8', (error, data) =>{
     if(error || data == '' || !data){
