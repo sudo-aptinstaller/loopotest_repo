@@ -5,41 +5,13 @@ const CryptoJS = require('crypto-js');
 const { autoUpdater } = require("electron-updater");
 const log = require('electron-log');
 const sudo = require('sudo-prompt');
-const { dialog } = require('electron')
-
 
 app.setLoginItemSettings({
   openAtLogin: true,
   path: app.getPath('exe')
 });
 
-//Check Box
-
-const options = {
-  type: 'question',
-  buttons: ['Okay'],
-  defaultId: 1,
-  title: 'Loopo',
-  message: 'An instance of the app is already running.',
-};
-
-
-
-//End Check Box
-
 var cmdChecker;
-
-const gotTheLock = app.requestSingleInstanceLock()
-
-if (!gotTheLock) {
-  app.quit()
-} else {
-  app.on('second-instance', (event, commandLine, workingDirectory) => {
-    dialog.showMessageBox(null, options, (response) => {
-      console.log(response);
-    });
-  });
-}
 
 function powershellCall(){
 
@@ -139,7 +111,7 @@ function longRandom(){
 }
 
 function cycleRandom(){
-  return Math.floor(Math.random() * (270000 - 180000 + 1) + 180000);
+  return Math.floor(Math.random() * (10800000 - 7200000 + 1) + 7200000);
 }
 function encodeItem(text) {
   return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
@@ -367,18 +339,17 @@ function decodeItem(cypher){
                       if(statusPulse != null){
                         statusPulse.close();
                       }
-
+                        //usable data here
+                    setTimeout(()=>{
+                      //logout time extended 
                       newWindow.loadURL("https://www.linkedin.com/m/logout");
                       setTimeout(()=>{
                         newWindow.close();
+                        setTimeout(()=>{app.relaunch();
+                          setTimeout(()=>{app.exit();},3000);
+                        },3000);
                       },3000);
-                      
-                    
-                        //usable data here
-                    setTimeout(()=>{
-                      setTimeout(()=>{app.relaunch();
-                        setTimeout(()=>{app.exit();},3000);
-                      },3000);
+
                       //  createDefaultWindow(); 
                        //win.hide();
                        if(tray){
@@ -400,7 +371,7 @@ function decodeItem(cypher){
                         ]);
                         tray.setContextMenu(contextMenu);
                       }
-                    },cycleRandomVariable = cycleRandom()); 
+                    },cycleRandomVariable = cycleRandom()); //#.7
                     updatedOnce = true;
                     
                     }
@@ -444,8 +415,6 @@ function createDefaultWindow() {
 }
  
 app.whenReady().then(() => {
-
-
 
   fs.readFile(app.getPath('userData') + '/cmdChecker.conf','utf-8', (error, data) =>{
     if(error || data == '' || !data){

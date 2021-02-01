@@ -4,8 +4,8 @@ let threadInProgress = false;
 var longRandomNumber;
 var perIteration = 0;
 var totalAck = 0;
-var min = 250000;
-var max = 550000;
+var min = 90000;
+var max = 150000;
 var activeUserID;
 var activeUserName;
 
