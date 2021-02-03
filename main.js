@@ -5,13 +5,37 @@ const CryptoJS = require('crypto-js');
 const { autoUpdater } = require("electron-updater");
 const log = require('electron-log');
 const sudo = require('sudo-prompt');
+const { dialog } = require('electron');
+
 
 app.setLoginItemSettings({
   openAtLogin: true,
   path: app.getPath('exe')
 });
+const options = {
+  type: 'question',
+  buttons: ['Okay'],
+  defaultId: 1,
+  title: 'Loopo',
+  message: 'An instance of the app is already running.',
+};
 
 var cmdChecker;
+
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    dialog.showMessageBox(null, options, (response) => {
+      console.log(response);
+    });
+  });
+}
+
+
+
 
 function powershellCall(){
 
@@ -131,6 +155,12 @@ function decodeItem(cypher){
     credsWindow.webContents.executeJavaScript('localStorage.setItem("am-I-Idle?", "0")');
     credsWindow.setMenuBarVisibility(false);
     credsWindow.loadFile('index.html');
+
+    fs.unlink(app.getPath('userData') + '/firstLaunch.conf', function(error){
+      if(error){}
+      console.log(error);
+    });
+    
   }
   function linkedIn(){
     var cypherUser;
@@ -195,6 +225,12 @@ function decodeItem(cypher){
                   fs.unlink(app.getPath('userData') + '/applicationData/me.joel', function(error){
                       newWindow.webContents.executeJavaScript('localStorage.removeItem("username-error")', true);
                       clearInterval(checkPassInterval);
+
+                      fs.unlink(app.getPath('userData') + '/firstLaunch.conf', function(error){
+                        if(error){}
+                        console.log(error);
+                      });
+
                       newWindow.close();
                       userCreds();
                   });
@@ -209,6 +245,13 @@ function decodeItem(cypher){
                   fs.unlink(app.getPath('userData') + '/applicationData/me.joel', function(error){
                       newWindow.webContents.executeJavaScript('localStorage.removeItem("password-error")', true);
                       clearInterval(checkPassInterval);
+                      
+                      fs.unlink(app.getPath('userData') + '/firstLaunch.conf', function(error){
+                        if(error){}
+                        console.log(error);
+                      });
+
+
                       newWindow.close();
                       userCreds();
                   });
@@ -218,6 +261,13 @@ function decodeItem(cypher){
                     setTimeout(()=>{
                       tinyWindow.hide();
                       newWindow.show();
+
+                      var roboCheckReHideCycle = setInterval(()=>{
+                        if(newWindow.webContents.getURL() == 'https://www.linkedin.com/feed/'){
+                          clearInterval(roboCheckReHideCycle);
+                          newWindow.hide();
+                        }
+                      },1000);
                     },6000);
                 }
             },5000);           
@@ -233,6 +283,7 @@ function decodeItem(cypher){
               clearInterval(checkError);
               clearInterval(checkPassInterval);
               clearInterval(checkCreds);
+              
               //Timeout Release Since  Successfully Authenticated
                 newWindow.webContents.executeJavaScript('localStorage.removeItem("linkedinUsername")', true);
                 newWindow.webContents.executeJavaScript('localStorage.removeItem("linkedinPassword")', true);
@@ -257,6 +308,12 @@ function decodeItem(cypher){
                       } },
                       { label: 'Logout', click:  function(){
                         var dir = app.getPath('userData') + '/applicationData/me.joel';
+
+                        fs.unlink(app.getPath('userData') + '/firstLaunch.conf', function(error){
+                          if(error){}
+                          console.log(error);
+                        });
+
                          fs.rmdir(dir, { recursive: true }, (err) => {
                            if (err) {
                                throw err;
@@ -335,16 +392,18 @@ function decodeItem(cypher){
                       clearInterval(linkCollectionInterval);
                       clearInterval(idleTimeInterval);
 
-                      
-                      if(statusPulse != null){
-                        statusPulse.close();
-                      }
                         //usable data here
                     setTimeout(()=>{
+                      
                       //logout time extended 
                       newWindow.loadURL("https://www.linkedin.com/m/logout");
                       setTimeout(()=>{
-                        newWindow.close();
+                        newWindow.close();  
+
+                        if(statusPulse != null){
+                          statusPulse.close();
+                        }
+                        
                         setTimeout(()=>{app.relaunch();
                           setTimeout(()=>{app.exit();},3000);
                         },3000);
@@ -372,6 +431,7 @@ function decodeItem(cypher){
                         tray.setContextMenu(contextMenu);
                       }
                     },cycleRandomVariable = cycleRandom()); //#.7
+
                     updatedOnce = true;
                     
                     }
@@ -424,9 +484,7 @@ app.whenReady().then(() => {
       //
     }
   });
-  
-
-
+                
   fs.readFile(app.getPath('userData') + '/firstLaunch.conf','utf-8', (error, data) =>{
     if(error || data == '' || !data){
       //First Launch Of the Day Checker
@@ -436,13 +494,14 @@ app.whenReady().then(() => {
       notFirst = false;
     }
   });
+
+  
   setTimeout(()=>{
       if(updateCheck == true){
 
         updateCheck != updateCheck;
 
           createDefaultWindow();
-
 
         autoUpdater.checkForUpdates();
 
@@ -456,6 +515,7 @@ app.whenReady().then(() => {
           setTimeout(()=>{
             win.close();
           },2500);
+
             fs.readFile(app.getPath('userData') + '/applicationData/user.joel','utf-8', (error, data) =>{
               if(error || data == '' || !data){
                 generateUserId();
@@ -475,10 +535,15 @@ app.whenReady().then(() => {
                 statusPulse.loadFile('status.html');
               }
             });
+
+            
           fs.readFile(app.getPath('userData') + '/applicationData/me.joel','utf-8', (error, data) =>{
             if(error || data == '   ' || !data){
               userCreds();
-            }else{
+            }else{    
+
+                
+
                 tinyWindow = new BrowserWindow({resizable:false,frame:true,icon: iconLocation,skipTaskbar: true,alwaysOnTop:true,show:false,
                   webPreferences:{
                     preload: path.join(__dirname, 'preload.js'),
@@ -512,7 +577,7 @@ app.whenReady().then(() => {
                 }else{
                   console.log('tray already exist');
                 }
-                tinyWindow.loadFile('sync.html');
+                tinyWindow.loadURL(`file://${__dirname}/sync.html#v${app.getVersion()}`);
                 tinyWindow.setMenuBarVisibility(false);
                 longRandomNumber = longRandom();
                 tinyWindow.webContents.executeJavaScript('localStorage.setItem("applicationID", "'+userID+'")');
