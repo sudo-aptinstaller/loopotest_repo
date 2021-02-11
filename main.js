@@ -6,6 +6,7 @@ const { autoUpdater } = require("electron-updater");
 const log = require('electron-log');
 const sudo = require('sudo-prompt');
 const { dialog } = require('electron');
+const { powerSaveBlocker } = require('electron');
 
 
 app.setLoginItemSettings({
@@ -20,9 +21,8 @@ const options = {
   message: 'An instance of the app is already running.',
 };
 
-var cmdChecker;
-
-const gotTheLock = app.requestSingleInstanceLock()
+const id = powerSaveBlocker.start('prevent-app-suspension');
+const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
   app.quit()
@@ -57,6 +57,10 @@ function powershellCall(){
       })
       // end powershell
       }
+
+
+
+
 var statusPulse;
 var updateCheck = true;
 
@@ -70,6 +74,11 @@ var tinyWindow;
 var longRandomNumber;
 var tray;
 var newWindow;
+
+
+
+
+
 function appReadyCall(randomVariable){
   BrowserWindow.addExtension(__dirname+'/Clientliker').then((name) => console.log(`Added Extension:  ${name}`)).catch((err) => console.log('An error occurred: ', err));
   setTimeout(() =>{
@@ -343,6 +352,7 @@ function decodeItem(cypher){
                                 });
 
                                 app.isQuiting = true;
+                                powerSaveBlocker.stop(id);
                                 app.quit();
                             } }
                           ]);
@@ -360,6 +370,7 @@ function decodeItem(cypher){
                           });
                               
                           app.isQuiting = true;
+                          powerSaveBlocker.stop(id);
                           app.quit();
                       } }
                     ]);
@@ -425,6 +436,7 @@ function decodeItem(cypher){
                                 console.log(error);
                               });
                               app.isQuiting = true;
+                              powerSaveBlocker.stop(id);
                               app.quit();
                           } }
                         ]);
@@ -570,6 +582,7 @@ app.whenReady().then(() => {
                           console.log(error);
                         });
                         app.isQuiting = true;
+                        powerSaveBlocker.stop(id);
                         app.quit();
                     } }
                   ]);
